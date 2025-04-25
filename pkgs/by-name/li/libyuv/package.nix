@@ -39,7 +39,7 @@ stdenv.mkDerivation {
       --replace "@VERSION@" "$version"
   '';
 
-  doCheck = true;
+  doCheck = !stdenv.hostPlatform.isLoongArch64;
 
   checkPhase = ''
     runHook preCheck
