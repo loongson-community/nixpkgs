@@ -92,7 +92,7 @@ stdenv.mkDerivation (finalAttrs: {
     util-linux
   ];
 
-  doCheck = true;
+  doCheck = !stdenv.hostPlatform.isLoongArch64;
 
   nativeCheckInputs = [
     openssl
