@@ -4,7 +4,7 @@
   fetchFromGitHub,
   buildPackages,
   cmake,
-  enableTests ? true,
+  enableTests ? !stdenv.hostPlatform.isLoongArch64,
   gtest,
   jre,
   pkg-config,
