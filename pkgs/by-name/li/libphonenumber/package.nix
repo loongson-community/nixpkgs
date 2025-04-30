@@ -4,6 +4,7 @@
   fetchFromGitHub,
   buildPackages,
   cmake,
+  enableTests ? false,
   gtest,
   jre,
   pkg-config,
@@ -29,29 +30,40 @@ stdenv.mkDerivation (finalAttrs: {
     ./build-reproducibility.patch
   ];
 
-  nativeBuildInputs = [
-    cmake
-    gtest
-    jre
-    pkg-config
-  ];
+  nativeBuildInputs =
+    [
+      cmake
+      pkg-config
+    ]
+    ++ lib.optionals enableTests [
+      gtest
+      jre
+    ];
 
-  buildInputs = [
-    boost
-    icu
-    protobuf
-  ];
+  buildInputs =
+    [
+      icu
+      protobuf
+    ]
+    ++ lib.optionals enableTests [
+      boost
+    ];
 
   cmakeDir = "../cpp";
 
-  doCheck = true;
+  doCheck = enableTests;
 
   checkTarget = "tests";
 
-  cmakeFlags = lib.optionals (!stdenv.buildPlatform.canExecute stdenv.hostPlatform) [
-    (lib.cmakeFeature "CMAKE_CROSSCOMPILING_EMULATOR" (stdenv.hostPlatform.emulator buildPackages))
-    (lib.cmakeFeature "PROTOC_BIN" (lib.getExe buildPackages.protobuf))
-  ];
+  cmakeFlags =
+    lib.optionals (!enableTests) [
+      (lib.cmakeBool "REGENERATE_METADATA" false)
+      (lib.cmakeBool "USE_BOOST" false)
+    ]
+    ++ lib.optionals (!stdenv.buildPlatform.canExecute stdenv.hostPlatform) [
+      (lib.cmakeFeature "CMAKE_CROSSCOMPILING_EMULATOR" (stdenv.hostPlatform.emulator buildPackages))
+      (lib.cmakeFeature "PROTOC_BIN" (lib.getExe buildPackages.protobuf))
+    ];
 
   meta = with lib; {
     changelog = "https://github.com/google/libphonenumber/blob/${finalAttrs.src.rev}/release_notes.txt";
