@@ -84,6 +84,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   mesonFlags = [
     (lib.mesonEnable "doc" enableDocumentation)
+    (lib.mesonEnable "dots_viewer" false)
   ];
 
   cargoRoot = "dots-viewer";
