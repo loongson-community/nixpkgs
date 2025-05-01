@@ -4,6 +4,7 @@
   buildPackages,
   runCommand,
   fetchurl,
+  fetchpatch,
   perl,
   python3,
   ruby,
@@ -103,12 +104,21 @@ clangStdenv.mkDerivation (finalAttrs: {
     hash = "sha256-1NxZcPD8alKf9/1nvL+rK7tekb54my6SeWQLMhengsM=";
   };
 
-  patches = lib.optionals clangStdenv.hostPlatform.isLinux [
-    (replaceVars ./fix-bubblewrap-paths.patch {
-      inherit (builtins) storeDir;
-      inherit (addDriverRunpath) driverLink;
-    })
-  ];
+  patches =
+    [
+      (fetchpatch {
+        name = "loongarch64-fix-simde.patch";
+        url = "https://gitlab.alpinelinux.org/alpine/aports/-/raw/fefa3d040402d2ba1689f72776ea0a0938d484e4/community/webkit2gtk-4.1/loongarch64-fix-simde.patch";
+        hash = "sha256-MPGFdZGVKllRuGcEv6Gx1VKxoBiJrebhF2Ri2Wdispc=";
+      })
+      ./skia-add-target_sources-for-loongarch64.patch
+    ]
+    ++ lib.optionals clangStdenv.hostPlatform.isLinux [
+      (replaceVars ./fix-bubblewrap-paths.patch {
+        inherit (builtins) storeDir;
+        inherit (addDriverRunpath) driverLink;
+      })
+    ];
 
   nativeBuildInputs =
     [
