@@ -1,0 +1,18 @@
+diff --git a/Source/ThirdParty/skia/CMakeLists.txt b/Source/ThirdParty/skia/CMakeLists.txt
+index 724b9ee421..8d430e3784 100644
+--- a/Source/ThirdParty/skia/CMakeLists.txt
++++ b/Source/ThirdParty/skia/CMakeLists.txt
+@@ -811,6 +811,13 @@ else ()
+     )
+     target_link_libraries(Skia PRIVATE Freetype::Freetype)
+ 
++    if (WTF_CPU_LOONGARCH64)
++        target_sources(Skia PRIVATE src/opts/SkOpts_lasx.cpp)
++        target_sources(Skia PRIVATE src/core/SkBitmapProcState_opts_lasx.cpp)
++        target_sources(Skia PRIVATE src/core/SkSwizzler_opts_lasx.cpp)
++        target_sources(Skia PRIVATE src/core/SkBlitRow_opts_lasx.cpp)
++    endif ()
++
+     if (ANDROID)
+         target_sources(Skia PRIVATE
+             src/ports/SkDebug_android.cpp
