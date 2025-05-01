@@ -4,6 +4,8 @@
   buildPackages,
   runCommand,
   fetchurl,
+  fetchpatch,
+  fetchDebianPatch,
   perl,
   python3,
   ruby,
@@ -103,12 +105,32 @@ clangStdenv.mkDerivation (finalAttrs: {
     hash = "sha256-mO/fIcTNyg/gtzq1qMtSCTtapS2bGwFqk/cdv6HrJY8=";
   };
 
-  patches = lib.optionals clangStdenv.hostPlatform.isLinux [
-    (replaceVars ./fix-bubblewrap-paths.patch {
-      inherit (builtins) storeDir;
-      inherit (addDriverRunpath) driverLink;
-    })
-  ];
+  patches =
+    [
+      (fetchpatch {
+        name = "loongarch64-fix-simde.patch";
+        url = "https://gitlab.alpinelinux.org/alpine/aports/-/raw/fefa3d040402d2ba1689f72776ea0a0938d484e4/community/webkit2gtk-4.1/loongarch64-fix-simde.patch";
+        hash = "sha256-MPGFdZGVKllRuGcEv6Gx1VKxoBiJrebhF2Ri2Wdispc=";
+      })
+      (fetchpatch {
+        name = "skia-add-target_sources-for-loongarch64.patch";
+        url = "https://gitlab.alpinelinux.org/alpine/aports/-/raw/fefa3d040402d2ba1689f72776ea0a0938d484e4/community/webkit2gtk-4.1/skia-add-target_sources-for-loongarch64.patch";
+        hash = "sha256-3YxXh5zwVeVb7VM6teLuM+WjS71MkzJuhYxnU+ZRtj0=";
+      })
+      (fetchDebianPatch {
+        pname = "webkit2gtk";
+        version = "2.48.1";
+        debianRevision = "2";
+        patch = "fix-typo-denormaldisabler.patch";
+        hash = "sha256-dF0jOEgqFM//PpZn0AB3H/2nG7/AbSay+/fK+eim1W4=";
+      })
+    ]
+    ++ lib.optionals clangStdenv.hostPlatform.isLinux [
+      (replaceVars ./fix-bubblewrap-paths.patch {
+        inherit (builtins) storeDir;
+        inherit (addDriverRunpath) driverLink;
+      })
+    ];
 
   nativeBuildInputs =
     [
