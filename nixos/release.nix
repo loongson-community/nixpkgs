@@ -10,6 +10,7 @@ with import ../lib;
   supportedSystems ? [
     "x86_64-linux"
     "aarch64-linux"
+    "loongarch64-linux"
   ],
   configuration ? { },
 }:
