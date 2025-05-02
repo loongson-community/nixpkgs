@@ -222,6 +222,14 @@ qtModule (
       })
     ];
 
+    prePatch =
+      if stdenv.hostPlatform.isLoongArch64 then
+        ''
+          sed '45d' -i src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
+        ''
+      else
+        null;
+
     postPatch =
       ''
         # Patch Chromium build tools
@@ -325,7 +333,10 @@ qtModule (
       '';
 
     qmakeFlags =
-      [
+      lib.optionals stdenv.hostPlatform.isLoongArch64 [
+        "QT_ARCH=loongarch64"
+      ]
+      ++ [
         "--"
         "-system-ffmpeg"
       ]

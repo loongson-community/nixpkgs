@@ -203,6 +203,26 @@ let
         # Backport of: https://code.qt.io/cgit/qt/qtwebengine-chromium.git/commit/?id=a766045f65f934df3b5f1aa63bc86fbb3e003a09
         ./qtwebengine-ninja-1.12.patch
       ]
+      # https://github.com/lcpu-club/loongarch-packages/tree/master/qt5-webengine
+      ++ lib.optionals stdenv.hostPlatform.isLoongArch64 [
+        (fetchpatch {
+          url = "https://github.com/deepin-community/qtwebengine-opensource-src/raw/cef7e6598ff8a83d28f443d39529a7afddc3d4ed/debian/patches/Port-for-loongarch64.patch";
+          hash = "sha256-KllU6o1g5IG5U+ojXI/Fbi6cImiRCi3cslv3ClPWCYI=";
+        })
+        (fetchpatch {
+          url = "https://github.com/lcpu-club/loongarch-packages/raw/525ed7d85e2a88090982a717895d5b55551e49f6/qt5-webengine/breakpad-getcontext.patch";
+          stripLen = 1;
+          extraPrefix = "src/3rdparty/chromium/";
+          hash = "sha256-+ymcmgTT2TIdKnrWJIlO4yKQ9KZqlMTsVYluyHF2ylM=";
+        })
+        (fetchpatch {
+          url = "https://github.com/lcpu-club/loongarch-packages/raw/525ed7d85e2a88090982a717895d5b55551e49f6/qt5-webengine/regexp-checkstack.patch";
+          stripLen = 1;
+          extraPrefix = "src/3rdparty/chromium/";
+          hash = "sha256-DqrxYXP8P6udZGZUh/QvA+zCxDnZIjg9l6EQWPT24Xg=";
+        })
+        ./qtwebengine-loongarch-icu.patch
+      ]
       ++ lib.optionals stdenv.hostPlatform.isDarwin [
         ./qtwebengine-darwin-no-platform-check.patch
         ./qtwebengine-mac-dont-set-dsymutil-path.patch
