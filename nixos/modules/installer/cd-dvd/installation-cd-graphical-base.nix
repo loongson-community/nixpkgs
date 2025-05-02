@@ -32,7 +32,8 @@
   services.spice-vdagentd.enable = true;
   services.qemuGuest.enable = true;
   virtualisation.vmware.guest.enable = pkgs.stdenv.hostPlatform.isx86;
-  virtualisation.hypervGuest.enable = true;
+  virtualisation.hypervGuest.enable =
+    pkgs.stdenv.hostPlatform.isx86 || pkgs.stdenv.hostPlatform.isAarch64;
   services.xe-guest-utilities.enable = pkgs.stdenv.hostPlatform.isx86;
   # The VirtualBox guest additions rely on an out-of-tree kernel module
   # which lags behind kernel releases, potentially causing broken builds.
