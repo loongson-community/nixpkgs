@@ -581,9 +581,10 @@ in
 
     isoImage.volumeID = lib.mkOption {
       # nixos-$EDITION-$RELEASE-$ARCH
+      # HACK (NOT UPSTREAMABLE!!!)
       default = "nixos${
         lib.optionalString (config.isoImage.edition != "") "-${config.isoImage.edition}"
-      }-${config.system.nixos.release}-${pkgs.stdenv.hostPlatform.uname.processor}";
+      }-${config.system.nixos.release}-loong64";
       type = lib.types.str;
       description = ''
         Specifies the label or volume ID of the generated ISO image.
