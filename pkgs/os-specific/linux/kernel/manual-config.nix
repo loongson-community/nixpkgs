@@ -505,6 +505,12 @@ lib.makeOverridable (
 
           # Delete empty directories
           find -empty -type d -delete
+        ''
+        # https://github.com/torvalds/linux/blob/master/arch/loongarch/Makefile
+        + lib.optionalString stdenv.hostPlatform.isLoongArch64 ''
+          mv "$out/vmlinuz-${modDirVersion}" "$out/vmlinuz.efi"
+          mv "$out/config-${modDirVersion}" "$out/config"
+          mv "$out/System.map-${modDirVersion}" "$out/System.map"
         '';
 
         requiredSystemFeatures = [ "big-parallel" ];
