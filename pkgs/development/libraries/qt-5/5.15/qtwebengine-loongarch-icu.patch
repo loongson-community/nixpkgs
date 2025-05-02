@@ -1,0 +1,12 @@
+diff --git a/src/3rdparty/chromium/third_party/icu/source/i18n/double-conversion-utils.h b/src/3rdparty/chromium/third_party/icu/source/i18n/double-conversion-utils.h
+index 8c6a0e16e..37d1dd3b8 100644
+--- a/src/3rdparty/chromium/third_party/icu/source/i18n/double-conversion-utils.h
++++ b/src/3rdparty/chromium/third_party/icu/source/i18n/double-conversion-utils.h
+@@ -118,6 +118,7 @@ int main(int argc, char** argv) {
+     defined(__ARMEL__) || defined(__avr32__) || defined(_M_ARM) || defined(_M_ARM64) || \
+     defined(__hppa__) || defined(__ia64__) || \
+     defined(__mips__) || \
++    defined(__loongarch__) || \
+     defined(__nios2__) || \
+     defined(__powerpc__) || defined(__ppc__) || defined(__ppc64__) || \
+     defined(_POWER) || defined(_ARCH_PPC) || defined(_ARCH_PPC64) || \
