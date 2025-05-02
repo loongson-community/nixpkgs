@@ -325,7 +325,10 @@ qtModule (
       '';
 
     qmakeFlags =
-      [
+      lib.optionals stdenv.hostPlatform.isLoongArch64 [
+        "QT_ARCH=loongarch64"
+      ]
+      ++ [
         "--"
         "-system-ffmpeg"
       ]
