@@ -123,6 +123,36 @@ qtModule {
     ./clang-base-path-from-cmake-compiler.patch
 
     ./lflags-remove-strip-darwin-isysroot.patch
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isLoongArch64 [
+    (fetchpatch2 {
+      name = "add-loong64-support.patch";
+      url = "https://github.com/lcpu-club/loongarch-packages/raw/de8b8896f4a3da7a3c7bb12a1fc2c138b4a4589c/qt6-webengine/add-loong64-support.patch?full_index=1";
+      stripLen = 2;
+      extraPrefix = "";
+      hash = "sha256-G3FUiTtnbrPYBFtjzfeG8HcUUvgPqxFXbKXRZrDO438=";
+    })
+    (fetchpatch2 {
+      name = "fix-para-type-in-delay.cc.patch";
+      url = "https://github.com/lcpu-club/loongarch-packages/raw/a4149fb25d2ff85509854815e2905e3452ea6640/qt6-webengine/fix-para-type-in-delay.cc.patch?full_index=1";
+      stripLen = 1;
+      extraPrefix = "src/3rdparty/chromium/";
+      hash = "sha256-FmWhwpZvRPmf62ec7ActBVryPzt6uJN/wR17/Mdva/o=";
+    })
+    (fetchpatch2 {
+      name = "fix-v8-assembler-kMaximalBufferSize.patch";
+      url = "https://github.com/lcpu-club/loongarch-packages/raw/7292b33657f6e476b286793cb8f3840b3d19e27f/qt6-webengine/fix-v8-assembler-kMaximalBufferSize.patch?full_index=1";
+      stripLen = 1;
+      extraPrefix = "src/3rdparty/chromium/";
+      hash = "sha256-3sHHdQ7PiDnyYFFqHLjfO8bLAkOxz3/vv1IKvcuB4b8=";
+    })
+    (fetchpatch2 {
+      name = "libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch";
+      url = "https://github.com/lcpu-club/loongarch-packages/raw/7292b33657f6e476b286793cb8f3840b3d19e27f/qt6-webengine/libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch?full_index=1";
+      stripLen = 1;
+      extraPrefix = "src/3rdparty/chromium/";
+      hash = "sha256-S4rj3XSjHENpJjGH9zH1+NIGjxRQOhBFL3Ya9VuPtWw=";
+    })
   ];
 
   postPatch = ''
@@ -179,12 +209,16 @@ qtModule {
     "-DQT_FEATURE_qtpdf_build=ON"
     "-DQT_FEATURE_qtpdf_widgets_build=ON"
     "-DQT_FEATURE_qtpdf_quick_build=ON"
+  ]
+  ++ lib.optionals (!stdenv.hostPlatform.isLoongArch64) [
     "-DQT_FEATURE_pdf_v8=ON"
     "-DQT_FEATURE_pdf_xfa=ON"
     "-DQT_FEATURE_pdf_xfa_bmp=ON"
     "-DQT_FEATURE_pdf_xfa_gif=ON"
     "-DQT_FEATURE_pdf_xfa_png=ON"
     "-DQT_FEATURE_pdf_xfa_tiff=ON"
+  ]
+  ++ [
     "-DQT_FEATURE_webengine_system_libevent=ON"
     "-DQT_FEATURE_webengine_system_ffmpeg=ON"
     # android only. https://bugreports.qt.io/browse/QTBUG-100293
@@ -304,6 +338,7 @@ qtModule {
       "aarch64-linux"
       "armv7a-linux"
       "armv7l-linux"
+      "loongarch64-linux"
       "x86_64-linux"
     ];
     # This build takes a long time; particularly on slow architectures
