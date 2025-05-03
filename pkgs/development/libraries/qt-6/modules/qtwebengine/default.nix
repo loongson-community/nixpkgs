@@ -71,9 +71,10 @@
   bootstrap_cmds,
   cctools,
   xcbuild,
+  llvmPackages,
 }:
 
-qtModule {
+(qtModule.override { stdenv = llvmPackages.stdenv; }) {
   pname = "qtwebengine";
   nativeBuildInputs = [
     bison
@@ -117,6 +118,22 @@ qtModule {
 
     # Reproducibility QTBUG-136068
     ./gn-object-sorted.patch
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isLoongArch64 [
+    (fetchpatch2 {
+      name = "add-loong64-support.patch";
+      url = "https://github.com/lcpu-club/loongarch-packages/raw/de8b8896f4a3da7a3c7bb12a1fc2c138b4a4589c/qt6-webengine/add-loong64-support.patch?full_index=1";
+      stripLen = 2;
+      extraPrefix = "";
+      hash = "sha256-G3FUiTtnbrPYBFtjzfeG8HcUUvgPqxFXbKXRZrDO438=";
+    })
+    (fetchpatch2 {
+      name = "fix-para-type-in-delay.cc.patch";
+      url = "https://github.com/lcpu-club/loongarch-packages/raw/a4149fb25d2ff85509854815e2905e3452ea6640/qt6-webengine/fix-para-type-in-delay.cc.patch?full_index=1";
+      stripLen = 1;
+      extraPrefix = "src/3rdparty/chromium/";
+      hash = "sha256-FmWhwpZvRPmf62ec7ActBVryPzt6uJN/wR17/Mdva/o=";
+    })
   ];
 
   postPatch = ''
@@ -164,12 +181,16 @@ qtModule {
     "-DQT_FEATURE_qtpdf_build=ON"
     "-DQT_FEATURE_qtpdf_widgets_build=ON"
     "-DQT_FEATURE_qtpdf_quick_build=ON"
+  ]
+  ++ lib.optionals (!stdenv.hostPlatform.isLoongArch64) [
     "-DQT_FEATURE_pdf_v8=ON"
     "-DQT_FEATURE_pdf_xfa=ON"
     "-DQT_FEATURE_pdf_xfa_bmp=ON"
     "-DQT_FEATURE_pdf_xfa_gif=ON"
     "-DQT_FEATURE_pdf_xfa_png=ON"
     "-DQT_FEATURE_pdf_xfa_tiff=ON"
+  ]
+  ++ [
     "-DQT_FEATURE_webengine_system_libevent=ON"
     "-DQT_FEATURE_webengine_system_ffmpeg=ON"
     # android only. https://bugreports.qt.io/browse/QTBUG-100293
@@ -278,6 +299,13 @@ qtModule {
     export NINJAFLAGS="-j$NIX_BUILD_CORES"
   '';
 
+  env.NIX_CFLAGS_COMPILE = lib.optionalString stdenv.hostPlatform.isLoongArch64 (
+    lib.concatStringsSep " " [
+      "-mlasx"
+      "-flax-vector-conversions"
+    ]
+  );
+
   # Debug info is too big to link with LTO.
   separateDebugInfo = false;
 
@@ -289,6 +317,7 @@ qtModule {
       "aarch64-linux"
       "armv7a-linux"
       "armv7l-linux"
+      "loongarch64-linux"
       "x86_64-linux"
     ];
     # This build takes a long time; particularly on slow architectures
