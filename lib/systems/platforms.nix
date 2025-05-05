@@ -571,6 +571,16 @@ rec {
       baseConfig = "defconfig";
       DTB = true;
     };
+    gcc = {
+      # https://github.com/loongson/la-softdev-convention/blob/master/la-softdev-convention.adoc#10-operating-system-package-build-requirements
+      arch = "la64v1.0";
+      strict-align = false;
+      # Avoid text sections of large apps exceeding default code model
+      # Will be default behavior in LLVM 21 and hopefully GCC16
+      # https://github.com/loongson-community/discussions/issues/43
+      # https://github.com/llvm/llvm-project/pull/132173
+      cmodel = "medium";
+    };
   };
 
   riscv-multiplatform = {
