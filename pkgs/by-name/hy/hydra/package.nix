@@ -10,6 +10,7 @@
   libpqxx,
   top-git,
   mercurial,
+  darcsSupport ? false,
   darcs,
   subversion,
   breezy,
@@ -150,7 +151,6 @@ stdenv.mkDerivation (finalAttrs: {
     libpqxx
     top-git
     mercurial
-    darcs
     subversion
     breezy
     openssl
@@ -163,7 +163,7 @@ stdenv.mkDerivation (finalAttrs: {
     boost
     nlohmann_json
     prometheus-cpp
-  ];
+  ] ++ lib.optionals darcsSupport [ darcs ];
 
   hydraPath = lib.makeBinPath (
     [
@@ -182,7 +182,6 @@ stdenv.mkDerivation (finalAttrs: {
       git
       top-git
       mercurial
-      darcs
       gnused
       breezy
     ]
@@ -191,6 +190,7 @@ stdenv.mkDerivation (finalAttrs: {
       dpkg
       cdrkit
     ]
+    ++ lib.optionals darcsSupport [ darcs ]
   );
 
   nativeBuildInputs = [
@@ -224,9 +224,13 @@ stdenv.mkDerivation (finalAttrs: {
 
   mesonBuildType = "release";
 
-  postPatch = ''
-    patchShebangs .
-  '';
+  postPatch =
+    ''
+      patchShebangs .
+    ''
+    + lib.optionalString (!darcsSupport) ''
+      rm t/input-types/darcs.t
+    '';
 
   preCheck = ''
     export LOGNAME=''${LOGNAME:-foo}
