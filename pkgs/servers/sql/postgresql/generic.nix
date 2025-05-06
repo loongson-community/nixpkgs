@@ -495,7 +495,8 @@ let
       # Also see <nixpkgs>/doc/stdenv/platform-notes.chapter.md
       doCheck = false;
       doInstallCheck =
-        !(stdenv'.hostPlatform.isStatic)
+        !(stdenv'.hostPlatform.isLoongArch64)
+        && !(stdenv'.hostPlatform.isStatic)
         &&
           # Tests currently can't be run on darwin, because of a Nix bug:
           # https://github.com/NixOS/nix/issues/12548
