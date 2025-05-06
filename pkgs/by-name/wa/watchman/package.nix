@@ -91,6 +91,8 @@ stdenv.mkDerivation (finalAttrs: {
     lockFile = ./Cargo.lock;
   };
 
+  env.NIX_LDFLAGS = lib.optionalString stdenv.hostPlatform.isLoongArch64 "--no-relax";
+
   doCheck = true;
 
   postPatch = ''
