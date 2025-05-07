@@ -136,7 +136,7 @@
   installBootLoader ? true,
 
   # Whether to output have EFIVARS available in $out/efi-vars.fd and use it during disk creation
-  touchEFIVars ? false,
+  touchEFIVars ? true,
 
   # OVMF firmware derivation
   OVMF ? pkgs.OVMF.fd,
