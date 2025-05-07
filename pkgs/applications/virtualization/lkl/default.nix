@@ -96,6 +96,8 @@ stdenv.mkDerivation {
   # symbol lookup error: liblkl-hijack.so: undefined symbol: __aarch64_ldadd4_sync
   env.NIX_CFLAGS_LINK = "-lgcc_s";
 
+  env.NIX_LDFLAGS = lib.optionalString stdenv.hostPlatform.isLoongArch64 "--no-relax";
+
   makeFlags = [
     "-C tools/lkl"
     "CC=${stdenv.cc}/bin/${stdenv.cc.targetPrefix}cc"
