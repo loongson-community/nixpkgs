@@ -162,6 +162,7 @@ self: super:
     patches = [
       ./imake.patch
       ./imake-cc-wrapper-uberhack.patch
+      ./imake-exotic.patch
     ];
     setupHook = ./imake-setup-hook.sh;
     CFLAGS = "-DIMAKE_COMPILETIME_CPP='\"${
