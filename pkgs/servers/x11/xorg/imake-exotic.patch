@@ -1,0 +1,29 @@
+diff --git a/imakemdep.h b/imakemdep.h
+index 12200d6..d522ec3 100644
+--- a/imakemdep.h
++++ b/imakemdep.h
+@@ -426,6 +426,24 @@ const char *cpp_argv[ARGUMENTS] = {
+ #    ifdef __SH4NOFPU__
+ 	"-D__SH4_NOFPU__",
+ #    endif
++#    ifdef __riscv
++	"-D__riscv",
++#     if (__riscv_xlen == 32)
++	"-D__riscv_xlen=32",
++#     endif
++#     if (__riscv_xlen == 64)
++	"-D__riscv_xlen=64",
++#     endif
++#    endif
++#    ifdef __loongarch__
++	"-D__loongarch__",
++#     if (__loongarch_grlen == 32)
++	"-D__loongarch_grlen=32",
++#     endif
++#     if (__loongarch_grlen == 64)
++	"-D__loongarch_grlen=64 -D__loongarch_lp64",
++#     endif
++#    endif
+ #    ifdef __GNUC__
+ 	"-traditional",
+ #    endif
