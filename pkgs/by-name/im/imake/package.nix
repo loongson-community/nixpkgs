@@ -37,6 +37,8 @@ stdenv.mkDerivation (finalAttrs: {
     # ELF interpreter path. (Which arguably, is a bug in its own.)
     # (copied from the commit message on 0100b270694ecab8aaa13fa5f3d30639b50d7777)
     ./cc-wrapper-uberhack.patch
+    # Fixes build on exotic platforms
+    ./exotic.patch
   ];
 
   strictDeps = true;
