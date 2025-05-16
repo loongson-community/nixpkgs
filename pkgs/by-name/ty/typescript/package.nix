@@ -21,7 +21,7 @@ buildNpmPackage rec {
     ./disable-dprint-dstBundler.patch
   ];
 
-  npmDepsHash = "sha256-ytdkxIjAd3UsU90o9IFZa5lGEv39zblBmgTTseVRGKQ=";
+  npmDepsHash = "sha256-1Ygmw2EvjhMtQSYcwDQB/tj+01v6EGRcWT6wvtiO1KI=";
 
   passthru.tests = {
     version = testers.testVersion {
