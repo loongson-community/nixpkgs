@@ -8,7 +8,6 @@
   xmlto,
   docbook_xml_dtd_45,
   docbook_xsl,
-  valgrind,
   sourceHighlight,
   meson,
   flex,
@@ -55,7 +54,6 @@ stdenv.mkDerivation rec {
     xmlto
     docbook_xml_dtd_45
     docbook_xsl
-    valgrind
     sourceHighlight
     flex
     bison
