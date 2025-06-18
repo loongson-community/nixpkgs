@@ -26,6 +26,8 @@ let
 
     build-system = [ setuptools ];
 
+    env.NIX_CFLAGS_COMPILE = "-fomit-frame-pointer";
+
     # tests in passthru, infinite recursion via objgraph/graphviz
     doCheck = false;
 
