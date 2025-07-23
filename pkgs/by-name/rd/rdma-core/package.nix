@@ -28,20 +28,30 @@ stdenv.mkDerivation (finalAttrs: {
 
   strictDeps = true;
 
-  outputs = [
-    "out"
-    "man"
-    "dev"
-  ];
+  outputs = 
+    [
+      "out"
+    ]
+    ++ lib.optionals (!stdenv.hostPlatform.isLoongArch64) [
+      "man"
+    ]
+    ++ [
+      "dev"
+    ];
 
-  nativeBuildInputs = [
-    cmake
-    docutils
-    pandoc
-    pkg-config
-    python3
-    udevCheckHook
-  ];
+  nativeBuildInputs = 
+    [
+      cmake
+    ]
+    ++ lib.optionals (!stdenv.hostPlatform.isLoongArch64) [
+      docutils
+      pandoc
+    ]
+    ++ [
+      pkg-config
+      python3
+      udevCheckHook
+    ];
 
   buildInputs = [
     ethtool
@@ -51,10 +61,11 @@ stdenv.mkDerivation (finalAttrs: {
     udev
   ];
 
-  cmakeFlags = [
-    "-DCMAKE_INSTALL_RUNDIR=/run"
-    "-DCMAKE_INSTALL_SHAREDSTATEDIR=/var/lib"
-  ];
+  cmakeFlags = 
+    [
+      "-DCMAKE_INSTALL_RUNDIR=/run"
+      "-DCMAKE_INSTALL_SHAREDSTATEDIR=/var/lib"
+    ] ++ lib.optional stdenv.hostPlatform.isLoongArch64 "-DNO_MAN_PAGES=1";
 
   postPatch = ''
     substituteInPlace srp_daemon/srp_daemon.sh.in \
