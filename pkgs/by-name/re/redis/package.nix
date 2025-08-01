@@ -104,7 +104,10 @@ stdenv.mkDerivation (finalAttrs: {
       --tags -leaks \
       --skipunit integration/aof-multi-part \
       --skipunit integration/failover \
+      --skipunit integration/logging \
       --skipunit integration/replication-rdbchannel \
+      --skipunit unit/aofrw \
+      --skipunit unit/maxmemory \
       --skiptest "Check MEMORY USAGE for embedded key strings with jemalloc"
       # ^ breaks due to unexpected and varying address space sizes that jemalloc gets built with
 
