@@ -3097,6 +3097,12 @@ with pkgs;
   temurin-bin-8 = javaPackages.compiler.temurin-bin.jdk-8;
   temurin-jre-bin-8 = javaPackages.compiler.temurin-bin.jre-8;
 
+  loongson-jdk-bin-25 = javaPackages.compiler.loongson-jdk-bin.jdk-25;
+  loongson-jdk-bin-21 = javaPackages.compiler.loongson-jdk-bin.jdk-21;
+  loongson-jdk-bin-17 = javaPackages.compiler.loongson-jdk-bin.jdk-17;
+  loongson-jdk-bin-11 = javaPackages.compiler.loongson-jdk-bin.jdk-11;
+  loongson-jdk-bin-8 = javaPackages.compiler.loongson-jdk-bin.jdk-8;
+
   temurin-bin = temurin-bin-21;
   temurin-jre-bin = temurin-jre-bin-21;
 
