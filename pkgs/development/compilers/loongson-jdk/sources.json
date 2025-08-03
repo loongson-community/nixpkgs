@@ -1,0 +1,53 @@
+{
+  "hotspot": {
+    "linux": {
+      "jdk": {
+        "openjdk11": {
+          "loongarch64": {
+            "sha256": "2ba6ba0e6bb668e3d8866d710a5ea740db96367c1a32154dd21723978ac5ee58",
+            "url": "https://ftp.loongnix.cn/Java/openjdk11/loongson11.19.27-fx-jdk11.0.32_9-linux-loongarch64-glibc2.34.tar.gz",
+            "version": "11.19.27"
+          },
+          "packageType": "jdk",
+          "vmType": "hotspot"
+        },
+        "openjdk17": {
+          "loongarch64": {
+            "sha256": "fc0f62c6a20341a83a13f3f410929daab1028817b29d2a64ae2965eab554ae89",
+            "url": "https://ftp.loongnix.cn/Java/openjdk17/loongson17.19.26-fx-jdk17.0.20_8-linux-loongarch64-glibc2.34.tar.gz",
+            "version": "17.19.26"
+          },
+          "packageType": "jdk",
+          "vmType": "hotspot"
+        },
+        "openjdk21": {
+          "loongarch64": {
+            "sha256": "37b08123b7995eeafd421cbedde7576b17803ff30089733c686990240aa2d437",
+            "url": "https://ftp.loongnix.cn/Java/openjdk21/loongson21.12.26-fx-jdk21.0.12_8-linux-loongarch64-glibc2.34.tar.gz",
+            "version": "21.12.26"
+          },
+          "packageType": "jdk",
+          "vmType": "hotspot"
+        },
+        "openjdk25": {
+          "loongarch64": {
+            "sha256": "4a64212fc95888c62216059ad65e31eafc5a8d17dd3222c299086a0d97398cce",
+            "url": "https://ftp.loongnix.cn/Java/openjdk25/loongson25.5.22-fx-jdk25.0.4_7-linux-loongarch64-glibc2.34.tar.gz",
+            "version": "25.5.22"
+          },
+          "packageType": "jdk",
+          "vmType": "hotspot"
+        },
+        "openjdk8": {
+          "loongarch64": {
+            "sha256": "81c4b0e55f1ff9dd8c97d1ac1915b26043809467131f2c2367a8e81a2706658a",
+            "url": "https://ftp.loongnix.cn/Java/openjdk8/loongson8.1.28-fx-jdk8u502b07-linux-loongarch64-glibc2.34.tar.gz",
+            "version": "8.1.28"
+          },
+          "packageType": "jdk",
+          "vmType": "hotspot"
+        }
+      }
+    }
+  }
+}

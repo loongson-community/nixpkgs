@@ -71,20 +71,44 @@
   gtk3,
   glib,
 
+  loongson-jdk-bin-8,
+  loongson-jdk-bin-11,
+  loongson-jdk-bin-17,
+  loongson-jdk-bin-21,
+  loongson-jdk-bin-25,
   temurin-bin-8,
   temurin-bin-11,
   temurin-bin-17,
   temurin-bin-21,
   temurin-bin-25,
   jdk-bootstrap ?
-    {
-      "8" = temurin-bin-8.__spliced.buildBuild or temurin-bin-8;
-      "11" = temurin-bin-11.__spliced.buildBuild or temurin-bin-11;
-      "17" = temurin-bin-17.__spliced.buildBuild or temurin-bin-17;
-      "21" = temurin-bin-21.__spliced.buildBuild or temurin-bin-21;
-      "25" = temurin-bin-25.__spliced.buildBuild or temurin-bin-25;
-    }
-    .${featureVersion},
+    let
+      spliced = bin: bin.__spliced.buildBuild or bin;
+
+      loongsonJdks = {
+        "8" = loongson-jdk-bin-8;
+        "11" = loongson-jdk-bin-11;
+        "17" = loongson-jdk-bin-17;
+        "21" = loongson-jdk-bin-21;
+        "25" = loongson-jdk-bin-25;
+      };
+
+      temurinJdks = {
+        "8" = temurin-bin-8;
+        "11" = temurin-bin-11;
+        "17" = temurin-bin-17;
+        "21" = temurin-bin-21;
+        "25" = temurin-bin-25;
+      };
+
+      selectJdk =
+        version:
+        if stdenv.buildPlatform.isLoongArch64 && loongsonJdks ? ${version} then
+          spliced loongsonJdks.${version}
+        else
+          spliced temurinJdks.${version};
+    in
+    selectJdk featureVersion,
 }:
 
 assert lib.assertMsg (enableGtk -> lib.versionAtLeast featureVersion "11")
@@ -118,6 +142,7 @@ let
         x86_64-linux = "amd64";
         aarch64-linux = "aarch64";
         powerpc64le-linux = "ppc64le";
+        loongarch64-linux = "loongarch64";
       }
       .${stdenv.system} or (throw "Unsupported platform ${stdenv.system}");
 
@@ -617,6 +642,7 @@ stdenv.mkDerivation (finalAttrs: {
       "i686-linux"
       "x86_64-linux"
       "aarch64-linux"
+      "loongarch64-linux"
     ]
     ++ lib.optionals atLeast11 [
       "armv7l-linux"
