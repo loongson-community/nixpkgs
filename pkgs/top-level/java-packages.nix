@@ -56,13 +56,15 @@ in
       corretto21 = callPackage ../development/compilers/corretto/21.nix { };
       corretto25 = callPackage ../development/compilers/corretto/25.nix { };
 
-      openjdk8 = mkOpenjdk "8";
-      openjdk11 = mkOpenjdk "11";
-      openjdk17 = mkOpenjdk "17";
-      openjdk21 = mkOpenjdk "21";
-      openjdk25 = mkOpenjdk "25";
+      # TODO: compile OpenJDK for LoongArch
+      openjdk8 = if stdenv.hostPlatform.isLoongArch64 then loongson-jdk-bin.jdk-8 else mkOpenjdk "8";
+      openjdk11 = if stdenv.hostPlatform.isLoongArch64 then loongson-jdk-bin.jdk-11 else mkOpenjdk "11";
+      openjdk17 = if stdenv.hostPlatform.isLoongArch64 then loongson-jdk-bin.jdk-17 else mkOpenjdk "17";
+      openjdk21 = if stdenv.hostPlatform.isLoongArch64 then loongson-jdk-bin.jdk-21 else mkOpenjdk "21";
+      openjdk25 = if stdenv.hostPlatform.isLoongArch64 then loongson-jdk-bin.jdk-25 else mkOpenjdk "25";
 
       # Legacy aliases
+      # TODO: LoongArch
       openjdk8-bootstrap = temurin-bin.jdk-8;
       openjdk11-bootstrap = temurin-bin.jdk-11;
       openjdk17-bootstrap = temurin-bin.jdk-17;
@@ -89,6 +91,15 @@ in
           };
         in
         lib.mapAttrs (name: drv: mkLinuxDarwin drv semeruDarwin.${name}) semeruLinux
+      );
+
+      loongson-jdk-bin = lib.recurseIntoAttrs (
+        let
+          loongsonLinux = import ../development/compilers/loongson-jdk/jdk-linux.nix {
+            inherit (pkgs) lib callPackage stdenv;
+          };
+        in
+        loongsonLinux
       );
     }
   );
