@@ -69,9 +69,14 @@ in
       openjdk25 = mkOpenjdk "25";
 
       # Legacy aliases
-      openjdk8-bootstrap = temurin-bin.jdk-8;
-      openjdk11-bootstrap = temurin-bin.jdk-11;
-      openjdk17-bootstrap = temurin-bin.jdk-17;
+      # Temurin publishes no LoongArch64 binaries; use Loongson's prebuilt JDKs
+      # to seed the bootstrap chain there instead.
+      openjdk8-bootstrap =
+        if stdenv.hostPlatform.isLoongArch64 then loongson-jdk-bin.jdk-8 else temurin-bin.jdk-8;
+      openjdk11-bootstrap =
+        if stdenv.hostPlatform.isLoongArch64 then loongson-jdk-bin.jdk-11 else temurin-bin.jdk-11;
+      openjdk17-bootstrap =
+        if stdenv.hostPlatform.isLoongArch64 then loongson-jdk-bin.jdk-17 else temurin-bin.jdk-17;
 
       temurin-bin = lib.recurseIntoAttrs (
         let
@@ -95,6 +100,15 @@ in
           };
         in
         lib.mapAttrs (name: drv: mkLinuxDarwin drv semeruDarwin.${name}) semeruLinux
+      );
+
+      loongson-jdk-bin = lib.recurseIntoAttrs (
+        let
+          loongsonLinux = import ../development/compilers/loongson-jdk/jdk-linux.nix {
+            inherit (pkgs) lib callPackage stdenv;
+          };
+        in
+        loongsonLinux
       );
     }
   );
