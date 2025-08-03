@@ -132,10 +132,4 @@
       };
     }
   ];
-  "fix-oopdesc-ptr-alignment-ub.patch" = [
-    {
-      only = "11";
-      path = ./11;
-    }
-  ];
 }
