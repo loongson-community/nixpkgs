@@ -9,6 +9,10 @@ stdenv.mkDerivation (finalAttrs: {
   version = "0.3.23";
 
   src = ./src;
+  
+  patches = [
+    ./calamares-nix4loong.patch
+  ];
 
   installPhase = ''
     runHook preInstall

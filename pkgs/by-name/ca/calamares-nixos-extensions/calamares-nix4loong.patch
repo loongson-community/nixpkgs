@@ -1,0 +1,30 @@
+diff --git a/modules/nixos/main.py b/modules/nixos/main.py
+index 9903de8..5b2f689 100644
+--- a/modules/nixos/main.py
++++ b/modules/nixos/main.py
+@@ -39,6 +39,25 @@ cfghead = """# Edit this configuration file to define what should be installed o
+       ./hardware-configuration.nix
+     ];
+ 
++  # Nix4Loong configurations, please keep this unless you know what you are doing!
++  system.defaultChannel = "https://download.nix4loong.cn/nix-channels/loong-master";
++  nix.registry.nixpkgs = {
++    from = {
++      type = "indirect";
++      id = "nixpkgs";
++    };
++    to = {
++      type = "tarball";
++      url = "https://download.nix4loong.cn/nix-channels/loong-master";
++    };
++  };
++  nix.extraOptions = ''
++    experimental-features = nix-command flakes
++    extra-substituters = https://cache.nix4loong.cn https://mirrors.nju.edu.cn/nix-channels/store
++    extra-trusted-public-keys = cache.nix4loong.cn-1:zmkwLihdSUyy6OFSVgvK3br0EaUEczLiJgDfvOmm3pA=
++    extra-system-features = gccarch-la64v1.0 gccarch-loongarch64
++  '';
++
+ """
+ cfgbootefi = """  # Bootloader.
+   boot.loader.systemd-boot.enable = true;
