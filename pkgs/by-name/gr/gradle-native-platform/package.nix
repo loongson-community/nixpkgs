@@ -15,6 +15,7 @@ let
       "i686" = "i386";
       "aarch64" = "aarch64";
       "riscv64" = "riscv64";
+      "loongarch64" = "loong64";
     }
     .${stdenv.hostPlatform.parsed.cpu.name} or stdenv.hostPlatform.parsed.cpu.name;
   platformId = "linux-${archId}";
