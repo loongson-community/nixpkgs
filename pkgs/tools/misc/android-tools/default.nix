@@ -40,6 +40,12 @@ stdenv.mkDerivation rec {
       extraPrefix = "vendor/extras/";
       hash = "sha256-PO6ZKP54ri2ujVa/uFXgMy/zMQjjIo4e/EPW2Cu6a1Q=";
     })
+    (fetchpatch2 {
+      url = "https://github.com/lcpu-club/loongarch-packages/raw/52540cdc8324544bc4da5e2c8f1a89ec9a28ebdf/android-tools/boringssl-add-loong64-support.patch";
+      stripLen = 1;
+      extraPrefix = "vendor/";
+      hash = "sha256-aqn29+OhKuKZld5VW3MpX5dANttMY/6D6Qchz5RBLkI=";
+    })
   ];
 
   nativeBuildInputs = [
