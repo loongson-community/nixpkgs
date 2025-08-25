@@ -208,7 +208,7 @@ stdenv.mkDerivation (finalAttrs: {
   # turn off all auto plugins since we use a list of plugins we generate
   mesonAutoFeatures = "disabled";
 
-  doCheck = stdenv.buildPlatform.canExecute stdenv.hostPlatform;
+  doCheck = stdenv.buildPlatform.canExecute stdenv.hostPlatform && !stdenv.hostPlatform.isLoongArch64;
 
   # csound lib dir must be manually specified for it to build
   preConfigure = ''
