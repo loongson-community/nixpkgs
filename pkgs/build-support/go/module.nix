@@ -269,6 +269,10 @@ lib.extendMkDerivation {
                 ''
             }
           ''
+          # $WORK/b069/_pkg_.a(_x001.o): unknown relocation type 110; compiled without -fpic?
+          + lib.optionalString stdenv.hostPlatform.isLoongArch64 ''
+            export NIX_CFLAGS_COMPILE="$NIX_CFLAGS_COMPILE -mcmodel=normal"
+          ''
           + ''
             runHook postConfigure
           ''
