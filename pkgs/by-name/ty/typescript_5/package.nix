@@ -23,7 +23,7 @@ buildNpmPackage (finalAttrs: {
     ./disable-dprint-dstBundler.patch
   ];
 
-  npmDepsHash = "sha256-4ft5168ru+aGPvZAxASQ4wkjtfNG2e0sNhJTedbiKQA=";
+  npmDepsHash = "sha256-q0NmN3UsfD58OJlMvYCWkGBcShrSbVPyxWF6gulyX9c=";
 
   nativeInstallCheckInputs = [
     versionCheckHook
