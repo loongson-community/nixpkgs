@@ -1,14 +1,373 @@
-Disable dprint on dstBundler
-
-dprint fails on sandbox, because it requires internet access to install its
-plugins.
-
+diff --git a/Herebyfile.mjs b/Herebyfile.mjs
+index fb96b072f..82d4fe601 100644
+--- a/Herebyfile.mjs
++++ b/Herebyfile.mjs
+@@ -588,13 +588,13 @@ export const lint = task({
+ export const format = task({
+     name: "format",
+     description: "Formats the codebase.",
+-    run: () => exec(process.execPath, ["node_modules/dprint/bin.js", "fmt"]),
++    run: () => {},
+ });
+ 
+ export const checkFormat = task({
+     name: "check-format",
+     description: "Checks that the codebase is formatted.",
+-    run: () => exec(process.execPath, ["node_modules/dprint/bin.js", "check"], { ignoreStdout: true }),
++    run: () => {},
+ });
+ 
+ export const knip = task({
+diff --git a/package-lock.json b/package-lock.json
+index 53fc39177..86368250d 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -13,8 +13,6 @@
+                 "tsserver": "bin/tsserver"
+             },
+             "devDependencies": {
+-                "@dprint/formatter": "^0.4.1",
+-                "@dprint/typescript": "0.93.4",
+                 "@esfx/canceltoken": "^1.0.0",
+                 "@eslint/js": "^9.20.0",
+                 "@octokit/rest": "^21.1.1",
+@@ -71,135 +69,6 @@
+                 "node": ">=18"
+             }
+         },
+-        "node_modules/@dprint/darwin-arm64": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/darwin-arm64/-/darwin-arm64-0.49.0.tgz",
+-            "integrity": "sha512-b8fwjdfYrX5H+QyeWiB27gPc1GMVdd2LorCtsZWC+MDQO6NOgpuxJePqccbQlFUumy2rfmQuLQprnldvQZhceg==",
+-            "cpu": [
+-                "arm64"
+-            ],
+-            "dev": true,
+-            "optional": true,
+-            "os": [
+-                "darwin"
+-            ]
+-        },
+-        "node_modules/@dprint/darwin-x64": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/darwin-x64/-/darwin-x64-0.49.0.tgz",
+-            "integrity": "sha512-cA/DIPlHClkufLufuIfcXHtZdlyP9U05RuJLvvAfHwJAxyeEC/chKYVc5BVz86RxMIq6czFGpJHoFtTjrfM3YA==",
+-            "cpu": [
+-                "x64"
+-            ],
+-            "dev": true,
+-            "optional": true,
+-            "os": [
+-                "darwin"
+-            ]
+-        },
+-        "node_modules/@dprint/formatter": {
+-            "version": "0.4.1",
+-            "resolved": "https://registry.npmjs.org/@dprint/formatter/-/formatter-0.4.1.tgz",
+-            "integrity": "sha512-IB/GXdlMOvi0UhQQ9mcY15Fxcrc2JPadmo6tqefCNV0bptFq7YBpggzpqYXldBXDa04CbKJ+rDwO2eNRPE2+/g==",
+-            "dev": true
+-        },
+-        "node_modules/@dprint/linux-arm64-glibc": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/linux-arm64-glibc/-/linux-arm64-glibc-0.49.0.tgz",
+-            "integrity": "sha512-UBo3lDJhotT+qza2S48DOPI64MirkJMoFDidh/TJBjokio2TcGd+QUzuB9O7J1+R3AlbwyObcTECjJryCNohHQ==",
+-            "cpu": [
+-                "arm64"
+-            ],
+-            "dev": true,
+-            "optional": true,
+-            "os": [
+-                "linux"
+-            ]
+-        },
+-        "node_modules/@dprint/linux-arm64-musl": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/linux-arm64-musl/-/linux-arm64-musl-0.49.0.tgz",
+-            "integrity": "sha512-XWAPL6Hp+zqk9bi57450wuy4yz4fvT72L3Zji3X7ChL5KD/apMUzQnZhmTpln2sxwIgJ3nCbzEzlF7jhhp/7KA==",
+-            "cpu": [
+-                "arm64"
+-            ],
+-            "dev": true,
+-            "optional": true,
+-            "os": [
+-                "linux"
+-            ]
+-        },
+-        "node_modules/@dprint/linux-riscv64-glibc": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/linux-riscv64-glibc/-/linux-riscv64-glibc-0.49.0.tgz",
+-            "integrity": "sha512-6GlGcauMeMbCCJ15OmAMkarouCifij9hb12Vz5UUZPevnutVoWRTQBPQLfllmd+9Znsp23fHnmzmykibdwj4Gw==",
+-            "cpu": [
+-                "riscv64"
+-            ],
+-            "dev": true,
+-            "optional": true,
+-            "os": [
+-                "linux"
+-            ]
+-        },
+-        "node_modules/@dprint/linux-x64-glibc": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/linux-x64-glibc/-/linux-x64-glibc-0.49.0.tgz",
+-            "integrity": "sha512-PJUM1G8L2xwF9R1s4/J6kf29S2sJ/sZGy3ah7g5Uj+oYkZq6SlMOrx3xqCXEkKSa0T6Xuc1bUBcJyrjEf36xiw==",
+-            "cpu": [
+-                "x64"
+-            ],
+-            "dev": true,
+-            "optional": true,
+-            "os": [
+-                "linux"
+-            ]
+-        },
+-        "node_modules/@dprint/linux-x64-musl": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/linux-x64-musl/-/linux-x64-musl-0.49.0.tgz",
+-            "integrity": "sha512-+WIInBwbCXYmWZcYYmnD8HdcZj6q8ewy6mPpHH6SDMtWr6nrxzyIVLFr72XeiBoHnVsQFUhN+wv5Bm5NnpJtRw==",
+-            "cpu": [
+-                "x64"
+-            ],
+-            "dev": true,
+-            "optional": true,
+-            "os": [
+-                "linux"
+-            ]
+-        },
+-        "node_modules/@dprint/typescript": {
+-            "version": "0.93.4",
+-            "resolved": "https://registry.npmjs.org/@dprint/typescript/-/typescript-0.93.4.tgz",
+-            "integrity": "sha512-2pyMXLK9Bnodv4vSh/mUeYbaSnnzIj+vFOTUC9GVjUouEKpMNkZZsuS5d7rPqr72tfoy96vzFepsRa7spkgcRA==",
+-            "dev": true
+-        },
+-        "node_modules/@dprint/win32-arm64": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/win32-arm64/-/win32-arm64-0.49.0.tgz",
+-            "integrity": "sha512-AteygrhmT7OXIgE/72REUfTPs/+qU0I1vhU379AYXgcWzOKy6Eeyi8lAt17oF7OmGT4IuyrKEDjpdTxhOWLsQw==",
+-            "cpu": [
+-                "arm64"
+-            ],
+-            "dev": true,
+-            "optional": true,
+-            "os": [
+-                "win32"
+-            ]
+-        },
+-        "node_modules/@dprint/win32-x64": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/win32-x64/-/win32-x64-0.49.0.tgz",
+-            "integrity": "sha512-8bE6P9T/32Gd+zMAkcwvUHzOLEMnbHEMgsgiKypYsdFTskpDz+y1GLJvMaxIFd2DB2tMx9TdBYuBQrJroTsMeQ==",
+-            "cpu": [
+-                "x64"
+-            ],
+-            "dev": true,
+-            "optional": true,
+-            "os": [
+-                "win32"
+-            ]
+-        },
+         "node_modules/@esbuild/aix-ppc64": {
+             "version": "0.25.0",
+             "resolved": "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.25.0.tgz",
+@@ -2106,27 +1975,6 @@
+                 "node": ">=0.3.1"
+             }
+         },
+-        "node_modules/dprint": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/dprint/-/dprint-0.49.0.tgz",
+-            "integrity": "sha512-xtBPZbPKWOOJH5al4h6rgzsGHuXpyK7TFJCQ5/TW8Z4zkcB9dfmPAh14/Yp5YZcB798D0liztXw+Nd7suzdzBQ==",
+-            "dev": true,
+-            "hasInstallScript": true,
+-            "bin": {
+-                "dprint": "bin.js"
+-            },
+-            "optionalDependencies": {
+-                "@dprint/darwin-arm64": "0.49.0",
+-                "@dprint/darwin-x64": "0.49.0",
+-                "@dprint/linux-arm64-glibc": "0.49.0",
+-                "@dprint/linux-arm64-musl": "0.49.0",
+-                "@dprint/linux-riscv64-glibc": "0.49.0",
+-                "@dprint/linux-x64-glibc": "0.49.0",
+-                "@dprint/linux-x64-musl": "0.49.0",
+-                "@dprint/win32-arm64": "0.49.0",
+-                "@dprint/win32-x64": "0.49.0"
+-            }
+-        },
+         "node_modules/dunder-proto": {
+             "version": "1.0.1",
+             "resolved": "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz",
+@@ -4935,81 +4783,6 @@
+             "integrity": "sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==",
+             "dev": true
+         },
+-        "@dprint/darwin-arm64": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/darwin-arm64/-/darwin-arm64-0.49.0.tgz",
+-            "integrity": "sha512-b8fwjdfYrX5H+QyeWiB27gPc1GMVdd2LorCtsZWC+MDQO6NOgpuxJePqccbQlFUumy2rfmQuLQprnldvQZhceg==",
+-            "dev": true,
+-            "optional": true
+-        },
+-        "@dprint/darwin-x64": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/darwin-x64/-/darwin-x64-0.49.0.tgz",
+-            "integrity": "sha512-cA/DIPlHClkufLufuIfcXHtZdlyP9U05RuJLvvAfHwJAxyeEC/chKYVc5BVz86RxMIq6czFGpJHoFtTjrfM3YA==",
+-            "dev": true,
+-            "optional": true
+-        },
+-        "@dprint/formatter": {
+-            "version": "0.4.1",
+-            "resolved": "https://registry.npmjs.org/@dprint/formatter/-/formatter-0.4.1.tgz",
+-            "integrity": "sha512-IB/GXdlMOvi0UhQQ9mcY15Fxcrc2JPadmo6tqefCNV0bptFq7YBpggzpqYXldBXDa04CbKJ+rDwO2eNRPE2+/g==",
+-            "dev": true
+-        },
+-        "@dprint/linux-arm64-glibc": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/linux-arm64-glibc/-/linux-arm64-glibc-0.49.0.tgz",
+-            "integrity": "sha512-UBo3lDJhotT+qza2S48DOPI64MirkJMoFDidh/TJBjokio2TcGd+QUzuB9O7J1+R3AlbwyObcTECjJryCNohHQ==",
+-            "dev": true,
+-            "optional": true
+-        },
+-        "@dprint/linux-arm64-musl": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/linux-arm64-musl/-/linux-arm64-musl-0.49.0.tgz",
+-            "integrity": "sha512-XWAPL6Hp+zqk9bi57450wuy4yz4fvT72L3Zji3X7ChL5KD/apMUzQnZhmTpln2sxwIgJ3nCbzEzlF7jhhp/7KA==",
+-            "dev": true,
+-            "optional": true
+-        },
+-        "@dprint/linux-riscv64-glibc": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/linux-riscv64-glibc/-/linux-riscv64-glibc-0.49.0.tgz",
+-            "integrity": "sha512-6GlGcauMeMbCCJ15OmAMkarouCifij9hb12Vz5UUZPevnutVoWRTQBPQLfllmd+9Znsp23fHnmzmykibdwj4Gw==",
+-            "dev": true,
+-            "optional": true
+-        },
+-        "@dprint/linux-x64-glibc": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/linux-x64-glibc/-/linux-x64-glibc-0.49.0.tgz",
+-            "integrity": "sha512-PJUM1G8L2xwF9R1s4/J6kf29S2sJ/sZGy3ah7g5Uj+oYkZq6SlMOrx3xqCXEkKSa0T6Xuc1bUBcJyrjEf36xiw==",
+-            "dev": true,
+-            "optional": true
+-        },
+-        "@dprint/linux-x64-musl": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/linux-x64-musl/-/linux-x64-musl-0.49.0.tgz",
+-            "integrity": "sha512-+WIInBwbCXYmWZcYYmnD8HdcZj6q8ewy6mPpHH6SDMtWr6nrxzyIVLFr72XeiBoHnVsQFUhN+wv5Bm5NnpJtRw==",
+-            "dev": true,
+-            "optional": true
+-        },
+-        "@dprint/typescript": {
+-            "version": "0.93.4",
+-            "resolved": "https://registry.npmjs.org/@dprint/typescript/-/typescript-0.93.4.tgz",
+-            "integrity": "sha512-2pyMXLK9Bnodv4vSh/mUeYbaSnnzIj+vFOTUC9GVjUouEKpMNkZZsuS5d7rPqr72tfoy96vzFepsRa7spkgcRA==",
+-            "dev": true
+-        },
+-        "@dprint/win32-arm64": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/win32-arm64/-/win32-arm64-0.49.0.tgz",
+-            "integrity": "sha512-AteygrhmT7OXIgE/72REUfTPs/+qU0I1vhU379AYXgcWzOKy6Eeyi8lAt17oF7OmGT4IuyrKEDjpdTxhOWLsQw==",
+-            "dev": true,
+-            "optional": true
+-        },
+-        "@dprint/win32-x64": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/@dprint/win32-x64/-/win32-x64-0.49.0.tgz",
+-            "integrity": "sha512-8bE6P9T/32Gd+zMAkcwvUHzOLEMnbHEMgsgiKypYsdFTskpDz+y1GLJvMaxIFd2DB2tMx9TdBYuBQrJroTsMeQ==",
+-            "dev": true,
+-            "optional": true
+-        },
+         "@esbuild/aix-ppc64": {
+             "version": "0.25.0",
+             "resolved": "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.25.0.tgz",
+@@ -6285,23 +6058,6 @@
+             "integrity": "sha512-PJWHUb1RFevKCwaFA9RlG5tCd+FO5iRh9A8HEtkmBH2Li03iJriB6m6JIN4rGz3K3JLawI7/veA1xzRKP6ISBw==",
+             "dev": true
+         },
+-        "dprint": {
+-            "version": "0.49.0",
+-            "resolved": "https://registry.npmjs.org/dprint/-/dprint-0.49.0.tgz",
+-            "integrity": "sha512-xtBPZbPKWOOJH5al4h6rgzsGHuXpyK7TFJCQ5/TW8Z4zkcB9dfmPAh14/Yp5YZcB798D0liztXw+Nd7suzdzBQ==",
+-            "dev": true,
+-            "requires": {
+-                "@dprint/darwin-arm64": "0.49.0",
+-                "@dprint/darwin-x64": "0.49.0",
+-                "@dprint/linux-arm64-glibc": "0.49.0",
+-                "@dprint/linux-arm64-musl": "0.49.0",
+-                "@dprint/linux-riscv64-glibc": "0.49.0",
+-                "@dprint/linux-x64-glibc": "0.49.0",
+-                "@dprint/linux-x64-musl": "0.49.0",
+-                "@dprint/win32-arm64": "0.49.0",
+-                "@dprint/win32-x64": "0.49.0"
+-            }
+-        },
+         "dunder-proto": {
+             "version": "1.0.1",
+             "resolved": "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz",
+diff --git a/package.json b/package.json
+index f7f35370b..279315b15 100644
+--- a/package.json
++++ b/package.json
+@@ -39,8 +39,6 @@
+         "!**/.gitattributes"
+     ],
+     "devDependencies": {
+-        "@dprint/formatter": "^0.4.1",
+-        "@dprint/typescript": "0.93.4",
+         "@esfx/canceltoken": "^1.0.0",
+         "@eslint/js": "^9.20.0",
+         "@octokit/rest": "^21.1.1",
+@@ -60,7 +58,6 @@
+         "chai": "^4.5.0",
+         "chokidar": "^4.0.3",
+         "diff": "^7.0.0",
+-        "dprint": "^0.49.0",
+         "esbuild": "^0.25.0",
+         "eslint": "^9.20.1",
+         "eslint-formatter-autolinkable-stylish": "^1.4.0",
+@@ -98,7 +95,7 @@
+         "gulp": "hereby",
+         "lint": "hereby lint",
+         "knip": "hereby knip",
+-        "format": "dprint fmt",
++        "format": ":",
+         "setup-hooks": "node scripts/link-hooks.mjs"
+     },
+     "browser": {
+diff --git a/scripts/dtsBundler.mjs b/scripts/dtsBundler.mjs
+index ade134287..398aedf54 100644
 --- a/scripts/dtsBundler.mjs
 +++ b/scripts/dtsBundler.mjs
-@@ -430,5 +430,5 @@
-     return result.replace(/\r\n/g, "\n");
+@@ -5,8 +5,6 @@
+  * bundle as namespaces again, even though the project is modules.
+  */
+ 
+-import * as dprintFormatter from "@dprint/formatter";
+-import * as dprintTypeScript from "@dprint/typescript";
+ import assert, { fail } from "assert";
+ import fs from "fs";
+ import minimist from "minimist";
+@@ -492,25 +490,5 @@ if (publicContents.includes("@internal")) {
+     console.error("Output includes untrimmed @internal nodes!");
  }
  
+-const buffer = fs.readFileSync(dprintTypeScript.getPath());
+-const formatter = dprintFormatter.createFromBuffer(buffer);
+-formatter.setConfig({
+-    indentWidth: 4,
+-    lineWidth: 1000,
+-    newLineKind: "auto",
+-    useTabs: false,
+-}, {
+-    quoteStyle: "preferDouble",
+-});
+-
+-/**
+- * @param {string} contents
+- * @returns {string}
+- */
+-function dprint(contents) {
+-    const result = formatter.formatText({ filePath: "dummy.d.ts", fileText: contents });
+-    return result.replace(/\r\n/g, "\n");
+-}
+-
 -fs.writeFileSync(output, dprint(publicContents));
 -fs.writeFileSync(internalOutput, dprint(internalContents));
 +fs.writeFileSync(output, publicContents);
