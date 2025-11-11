@@ -92,6 +92,8 @@ let
   # Experimental
   haveFlashrom = isx86 && enableFlashrom;
 
+  haveValgrind = lib.meta.availableOn stdenv.hostPlatform valgrind;
+
   runPythonCommand =
     name: buildCommandPython:
 
@@ -247,11 +249,13 @@ stdenv.mkDerivation (finalAttrs: {
     readline
     sqlite
     tpm2-tss
-    valgrind
     xz # for liblzma
   ]
   ++ lib.optionals haveFlashrom [
     flashrom
+  ]
+  ++ lib.optionals haveValgrind [
+    valgrind
   ];
 
   mesonFlags = [
@@ -278,6 +282,9 @@ stdenv.mkDerivation (finalAttrs: {
   ]
   ++ lib.optionals (!haveFlashrom) [
     (lib.mesonEnable "plugin_flashrom" false)
+  ]
+  ++ lib.optionals (!haveValgrind) [
+    (lib.mesonEnable "valgrind" false)
   ];
 
   # TODO: wrapGAppsHook3 wraps efi capsule even though it is not ELF
