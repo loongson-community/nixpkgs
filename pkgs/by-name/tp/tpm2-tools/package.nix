@@ -11,6 +11,8 @@
   libuuid,
   abrmdSupport ? true,
   tpm2-abrmd ? null,
+  buildPackages,
+  enableManpages ? buildPackages.pandoc.compiler.bootstrapAvailable,
 }:
 
 stdenv.mkDerivation rec {
@@ -23,9 +25,11 @@ stdenv.mkDerivation rec {
   };
 
   nativeBuildInputs = [
-    pandoc
     pkg-config
     makeWrapper
+  ]
+  ++ lib.optionals enableManpages [
+    pandoc
   ];
   buildInputs = [
     curl
