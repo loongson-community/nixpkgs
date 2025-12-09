@@ -325,6 +325,15 @@ buildStdenv.mkDerivation {
             revert = true;
           })
         ]
+    # Patch brotli on loongarch64 to fix build issues
+    ++ lib.optionals (lib.versionAtLeast version "146" && stdenv.hostPlatform.isLoongArch64) [
+      (fetchpatch {
+        url = "https://github.com/alpinelinux/aports/raw/e1a74d1bc0c4e0308990de2e9ec9d82529fcac8f/main/brotli/fix-lp64.patch";
+        stripLen = 2;
+        extraPrefix = "modules/brotli/";
+        hash = "sha256-apzFsdn0T4+FRmH/BO051Wm9kBTtWtDi9Vu/SRKTrzE=";
+      })
+    ]
     ++ extraPatches;
 
   postPatch = ''
