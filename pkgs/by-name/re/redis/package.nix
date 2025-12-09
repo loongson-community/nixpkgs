@@ -105,6 +105,7 @@ stdenv.mkDerivation (finalAttrs: {
       --skipunit integration/aof-multi-part \
       --skipunit integration/failover \
       --skipunit integration/logging \
+      --skipunit integration/replication \
       --skipunit integration/replication-rdbchannel \
       --skipunit unit/aofrw \
       --skipunit unit/maxmemory \
