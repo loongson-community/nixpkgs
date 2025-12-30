@@ -2,6 +2,7 @@
   lib,
   stdenv,
   fetchFromGitHub,
+  fetchpatch,
   cmake,
   python3Packages,
   staticOnly ? stdenv.hostPlatform.isStatic,
@@ -19,6 +20,14 @@ stdenv.mkDerivation (finalAttrs: {
     tag = "v${finalAttrs.version}";
     hash = "sha256-kl8ZHt71v17QR2bDP+ad/5uixf+GStEPLQ5ooFoC5i8=";
   };
+
+  patches = lib.optionals stdenv.hostPlatform.isLoongArch64 [
+    (fetchpatch {
+      name = "disable-BROTLI_MODEL-macro-for-some-targets.patch";
+      url = "https://github.com/google/brotli/commit/e230f474b87134e8c6c85b630084c612057f253e.patch";
+      hash = "sha256-3y1xTTMHdqx40CI4VLk0GopLXvczQ960lqwO2fl1GIM=";
+    })
+  ];
 
   nativeBuildInputs = [ cmake ];
 
