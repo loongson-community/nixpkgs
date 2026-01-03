@@ -1,4 +1,8 @@
-{ lib, callPackage }:
+{
+  lib,
+  stdenv,
+  callPackage,
+}:
 
 let
   dockerGen =
@@ -443,8 +447,13 @@ in
       cliHash = "sha256-8VpFDYn9mRFv7BnHek2+HvIu6jNPYNC1asozJvRX/A4=";
       mobyRev = "docker-v${version}";
       mobyHash = "sha256-yB6FF4tzi6R+wH6U0JS8PMZGVRl1gWCY2Cjb/JR+62w=";
-      runcRev = "v1.3.4";
-      runcHash = "sha256-1IfY08sBoDpbLrwz1AKBRSTuCZyOgQzYPHTDUI6fOZ8=";
+      # loongarch64 needs runc 1.4.0+ for libseccomp-golang to support loongarch64
+      runcRev = if stdenv.hostPlatform.isLoongArch64 then "v1.4.0" else "v1.3.4";
+      runcHash =
+        if stdenv.hostPlatform.isLoongArch64 then
+          "sha256-XPS9qWgDyKVLYs/QqWof6ydVK1T41QD8yDpvztc3NMc="
+        else
+          "sha256-1IfY08sBoDpbLrwz1AKBRSTuCZyOgQzYPHTDUI6fOZ8=";
       containerdRev = "v2.2.0";
       containerdHash = "sha256-LXBGA03FTrrbxlH+DxPBFtp3/AYQf096YE2rpe6A+WM=";
       tiniRev = "369448a167e8b3da4ca5bca0b3307500c3371828";
