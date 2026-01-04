@@ -3,11 +3,8 @@
   stdenv,
   fetchurl,
   perl,
-  gcc,
-  ncurses5,
   ncurses6,
   gmp,
-  libiconv,
   numactl,
   libffi,
   coreutils,
@@ -25,6 +22,7 @@ let
   ghcDebs = {
     powerpc64-linux = {
       variantSuffix = "";
+      triple = "powerpc64-linux-gnu";
       src = {
         url = "http://ftp.ports.debian.org/debian-ports/pool-ppc64/main/g/ghc/ghc_9.6.6-4_ppc64.deb";
         sha256 = "722cc301b6ba70b342e5e3d9d0671440bcd749cd2f13dcccbd23c3f6a6060171";
@@ -48,6 +46,7 @@ let
           fileToCheckFor = null;
         }
       ];
+      extraRuntimeDeps = [ ];
     };
   };
 
@@ -64,7 +63,8 @@ let
     targetPackages.stdenv.cc
     targetPackages.stdenv.cc.bintools
     coreutils # for cat
-  ];
+  ]
+  ++ debUsed.extraRuntimeDeps;
 
   extraLibraryMapping = {
     gmp = gmpUsed;
@@ -189,11 +189,11 @@ stdenv.mkDerivation (finalAttrs: {
     # Patch ghc settings
     + ''
       substituteInPlace $out/lib/ghc/lib/settings \
-        --replace-fail powerpc64-linux-gnu-gcc gcc \
-        --replace-fail powerpc64-linux-gnu-g++ g++ \
-        --replace-fail powerpc64-linux-gnu-ld ld \
-        --replace-fail powerpc64-linux-gnu-ar ar \
-        --replace-fail powerpc64-linux-gnu-ranlib ranlib \
+        --replace-fail ${debUsed.triple}-gcc gcc \
+        --replace-fail ${debUsed.triple}-g++ g++ \
+        --replace-fail ${debUsed.triple}-ld ld \
+        --replace-fail ${debUsed.triple}-ar ar \
+        --replace-fail ${debUsed.triple}-ranlib ranlib \
         --replace-fail llc-18 llc \
         --replace-fail opt-18 opt
     '';
