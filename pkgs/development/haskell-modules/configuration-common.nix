@@ -465,6 +465,9 @@ with haskellLib;
   # Too strict bounds on bytestring < 0.12
   superbuffer = doJailbreak super.superbuffer;
 
+  # https://github.com/loongson-community/nixpkgs/pull/14
+  attoparsec = dontCheckIf pkgs.stdenv.hostPlatform.isLoongArch64 super.attoparsec;
+
   # Infinite recursion with test enabled.
   # 2025-02-14: Too strict bounds on attoparsec < 0.14
   attoparsec-varword = doJailbreak (dontCheck super.attoparsec-varword);
