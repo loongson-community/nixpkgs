@@ -9,6 +9,7 @@
   libffi,
   coreutils,
   targetPackages,
+  llvmPackages_18,
 }:
 
 # Prebuilt only does native
@@ -20,6 +21,34 @@ let
   # GHC upstream doesn't release bindist tarballs for some platforms.
   # We're using Debian's binary package, and patching it into a usable-in-Nixpkgs state.
   ghcDebs = {
+    loongarch64-linux = {
+      variantSuffix = "";
+      triple = "loongarch64-linux-gnu";
+      src = {
+        url = "http://ftp.ports.debian.org/debian-ports/pool-loong64/main/g/ghc/ghc_9.6.6-4+b1_loong64.deb";
+        sha256 = "f14b5e3c8e6bd233b5be8e72c369fea0644f2a804d7636f930c05b4abf77d57f";
+      };
+      exePathForLibraryCheck = null;
+      archSpecificLibraries = [
+        {
+          nixPackage = gmp;
+          fileToCheckFor = null;
+        }
+        {
+          nixPackage = ncurses6;
+          fileToCheckFor = "libtinfo.so.6";
+        }
+        {
+          nixPackage = numactl;
+          fileToCheckFor = null;
+        }
+        {
+          nixPackage = libffi;
+          fileToCheckFor = null;
+        }
+      ];
+      extraRuntimeDeps = [ (lib.getBin llvmPackages_18.llvm) ];
+    };
     powerpc64-linux = {
       triple = "powerpc64-linux-gnu";
       src = {
@@ -263,7 +292,10 @@ stdenv.mkDerivation (finalAttrs: {
     description = "Glasgow Haskell Compiler";
     license = lib.licenses.bsd3;
     platforms = builtins.attrNames ghcDebs;
-    maintainers = [ lib.maintainers.OPNA2608 ];
+    maintainers = with lib.maintainers; [
+      OPNA2608
+      darkyzhou
+    ];
     teams = [ lib.teams.haskell ];
   };
 })
