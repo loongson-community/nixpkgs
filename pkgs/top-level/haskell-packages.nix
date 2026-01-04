@@ -92,6 +92,11 @@ in
   compiler = pkgs.lib.recurseIntoAttrs (
     let
       bb = pkgsBuildBuild.haskell;
+      
+      isPower64BigEndianElfv1 =
+        stdenv.buildPlatform.isPower64
+        && stdenv.buildPlatform.isBigEndian
+        && pkgs.stdenv.hostPlatform.isAbiElfv1;
     in
     {
       # Required to bootstrap 9.4.8.
@@ -99,7 +104,10 @@ in
         inherit llvmPackages;
       };
 
-      ghc966DebianBinary = callPackage ../development/compilers/ghc/9.6.6-debian-binary.nix { };
+      ghc966DebianBinary = callPackage ../development/compilers/ghc/9.6.6-debian-binary.nix {
+        # LLVM doesn't support LoongArch64 until 16. We use 18 here following Debian.
+        llvmPackages_18 = pkgs.llvmPackages_18;
+      };
 
       ghc984Binary = callPackage ../development/compilers/ghc/9.8.4-binary.nix { };
 
@@ -114,11 +122,7 @@ in
       };
       ghc967 = callPackage ../development/compilers/ghc/9.6.7.nix {
         bootPkgs =
-          if
-            stdenv.buildPlatform.isPower64
-            && stdenv.buildPlatform.isBigEndian
-            && pkgs.stdenv.hostPlatform.isAbiElfv1
-          then
+          if isPower64BigEndianElfv1 || stdenv.buildPlatform.isLoongArch64 then
             # No bindist, "borrowing" the GHC from Debian
             bb.packages.ghc966DebianBinary
           else
@@ -129,11 +133,7 @@ in
       };
       ghc984 = callPackage ../development/compilers/ghc/9.8.4.nix {
         bootPkgs =
-          if
-            stdenv.buildPlatform.isPower64
-            && stdenv.buildPlatform.isBigEndian
-            && pkgs.stdenv.hostPlatform.isAbiElfv1
-          then
+          if isPower64BigEndianElfv1 || stdenv.buildPlatform.isLoongArch64 then
             # No bindist, "borrowing" the GHC from Debian
             bb.packages.ghc966DebianBinary
           else if stdenv.buildPlatform.isi686 then
@@ -146,11 +146,7 @@ in
       };
       ghc9103 = callPackage ../development/compilers/ghc/9.10.3.nix {
         bootPkgs =
-          if
-            stdenv.buildPlatform.isPower64
-            && stdenv.buildPlatform.isBigEndian
-            && pkgs.stdenv.hostPlatform.isAbiElfv1
-          then
+          if isPower64BigEndianElfv1 || stdenv.buildPlatform.isLoongArch64 then
             # No bindist, "borrowing" the GHC from Debian
             bb.packages.ghc966DebianBinary
           else if stdenv.buildPlatform.isi686 then
