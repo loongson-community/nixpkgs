@@ -1,0 +1,297 @@
+diff --git a/include/loongarch-extcontext.h b/include/loongarch-extcontext.h
+index c29189cb8e..5ccfeedda8 100644
+--- a/include/loongarch-extcontext.h
++++ b/include/loongarch-extcontext.h
+@@ -9,7 +9,10 @@
+ 
+ #if defined(CONFIG_LOONGARCH_NEW_WORLD) && defined(__loongarch__)
+ #include "qemu/osdep.h"
++/* Rename kernel's sigcontext to avoid conflict with musl's definition */
++#define sigcontext linux_sigcontext
+ #include "asm/sigcontext.h"
++#undef sigcontext
+ 
+ struct _ctx_layout {
+     struct sctx_info *addr;
+diff --git a/linux-user/signal.c b/linux-user/signal.c
+index 55de62fb62..a0f6dd58d6 100644
+--- a/linux-user/signal.c
++++ b/linux-user/signal.c
+@@ -94,6 +94,12 @@ abi_ulong default_rt_sigreturn;
+  * Signal number 0 is reserved for use as kill(pid, 0), to test whether
+  * a process exists without sending it a signal.
+  */
++
++/* musl doesn't define __SIGRTMAX, use _NSIG - 1 instead */
++#ifndef __SIGRTMAX
++#define __SIGRTMAX (_NSIG - 1)
++#endif
++
+ QEMU_BUILD_BUG_ON(__SIGRTMAX + 1 != _NSIG);
+ static uint8_t host_to_target_signal_table[_NSIG] = {
+     [SIGHUP] = TARGET_SIGHUP,
+diff --git a/linux-user/syscall.c b/linux-user/syscall.c
+index c8d527751d..d71ceab19e 100644
+--- a/linux-user/syscall.c
++++ b/linux-user/syscall.c
+@@ -98,6 +98,19 @@
+ #include <linux/mtio.h>
+ #include <linux/fs.h>
+ #include <linux/fd.h>
++
++#if !defined(__GLIBC__)
++#define truncate64 truncate
++#define ftruncate64 ftruncate
++#define pread64 pread
++#define pwrite64 pwrite
++#define flock64 flock
++#define off64_t off_t
++#define F_GETLK64 F_GETLK
++#define F_SETLK64 F_SETLK
++#define F_SETLKW64 F_SETLKW
++#endif
++
+ #if defined(CONFIG_FIEMAP)
+ #include <linux/fiemap.h>
+ #endif
+@@ -9840,7 +9853,7 @@ static inline abi_long target_to_host_sigevent(struct sigevent *host_sevp,
+     host_sevp->sigev_signo =
+         target_to_host_signal(tswap32(target_sevp->sigev_signo));
+     host_sevp->sigev_notify = tswap32(target_sevp->sigev_notify);
+-    host_sevp->_sigev_un._tid = tswap32(target_sevp->_sigev_un._tid);
++    host_sevp->sigev_notify_thread_id = tswap32(target_sevp->_sigev_un._tid);
+ 
+     unlock_user_struct(target_sevp, target_addr, 1);
+     return 0;
+@@ -10355,7 +10368,7 @@ static char * get_key_value_from_file(const char * key, char * real_path)
+         char* ret = fgets(buf, sizeof(buf), f);
+         (void)ret;
+         if (ret) {
+-            if (sscanf(buf, key_value_str, &value) == 1) {
++            if (sscanf(buf, key_value_str, value) == 1) {
+                 fclose(f);
+                 char *rvalue = malloc(strlen(value) + 1);
+                 strcpy(rvalue, value);
+@@ -10367,6 +10380,23 @@ static char * get_key_value_from_file(const char * key, char * real_path)
+     return NULL;
+ }
+ 
++static char *get_self_exe_path(void)
++{
++    static char *self_exe;
++    if (self_exe) {
++        return self_exe;
++    }
++
++    char buf[PATH_MAX];
++    ssize_t n = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
++    if (n <= 0) {
++        return NULL;
++    }
++    buf[n] = '\0';
++    self_exe = strdup(buf);
++    return self_exe;
++}
++
+ static char* get_latx_binfmtinterpreter(void)
+ {
+     char *is_indocker = getenv("LATX_DOCKER");
+@@ -10382,8 +10412,8 @@ static char* get_latx_binfmtinterpreter(void)
+     char tmpstr [PATH_MAX];
+     DIR *dir = opendir(binfmt_path);
+     if (dir == NULL) {
+-       lsassertm(0, "dir %s not exist\n", binfmt_path);
+-       return NULL;
++        /* binfmt_misc is optional and often unavailable inside containers */
++        return NULL;
+     }
+ 
+     struct dirent *entry;
+@@ -10397,12 +10427,13 @@ static char* get_latx_binfmtinterpreter(void)
+             if(!strncmp(value, magic, strlen(magic))) {
+                 value = get_key_value_from_file("interpreter", tmpstr);
+                 lsassert(value);
++                closedir(dir);
+                 return value;
+             }
+             free(value);
+         }
+     }
+-    fprintf(stderr, "fixme:%s:latx cannot find %sXX\n", binfmt_path, __func__);
++    closedir(dir);
+     return NULL;
+ }
+ static int open_other_cmdline(void *cpu_env, int fd, const char *oldpath)
+@@ -10416,6 +10447,10 @@ static int open_other_cmdline(void *cpu_env, int fd, const char *oldpath)
+     int cpy_offset = 0;
+     if (!latx_binfmtinterpreter) {
+         latx_binfmtinterpreter = get_latx_binfmtinterpreter();
++        if (!latx_binfmtinterpreter) {
++            /* Fallback: compare against our own executable path */
++            latx_binfmtinterpreter = get_self_exe_path();
++        }
+     }
+     FILE *f = fopen(oldpath, "r");
+     lsassertm(f, "can open %s", oldpath);
+@@ -10472,7 +10507,7 @@ static int open_other_cmdline(void *cpu_env, int fd, const char *oldpath)
+             goto out;
+         }
+     }
+-    if (!strcmp(argv[0], latx_binfmtinterpreter)) {
++    if (latx_binfmtinterpreter && !strcmp(argv[0], latx_binfmtinterpreter)) {
+         cpy_offset = 1;
+     }
+     for (int i = cpy_offset; i < argc; i++) {
+diff --git a/target/i386/latx/context/wrappedlibc.c b/target/i386/latx/context/wrappedlibc.c
+index 21c1f8d952..27aac36d7a 100644
+--- a/target/i386/latx/context/wrappedlibc.c
++++ b/target/i386/latx/context/wrappedlibc.c
+@@ -2503,7 +2503,7 @@ void InitCpuModel()
+ }
+ #endif
+ 
+-#ifdef ANDROID
++#if defined(ANDROID) || !defined(__GLIBC__)
+ void ctSetup()
+ {
+ }
+diff --git a/target/i386/latx/error.c b/target/i386/latx/error.c
+index 983615c3e2..d01cab4c02 100644
+--- a/target/i386/latx/error.c
++++ b/target/i386/latx/error.c
+@@ -1,5 +1,7 @@
+ #include "error.h"
++#ifdef __GLIBC__
+ #include <execinfo.h>
++#endif
+ #include <stdlib.h>
+ #include <stdio.h>
+ 
+@@ -7,6 +9,7 @@ void print_stack_trace(void)
+ {
+ #define BTSIZT 64
+     void    * array[BTSIZT] = {0};
++#ifdef __GLIBC__
+     size_t  size;
+     char    ** strings;
+     size_t  i;
+@@ -19,4 +22,7 @@ void print_stack_trace(void)
+ 
+     free (strings);
+     strings = NULL;
++#else
++    printf("stack trace unavailable on non-glibc\n");
++#endif
+ }
+diff --git a/target/i386/latx/include/box64context.h b/target/i386/latx/include/box64context.h
+index a5db0651d1..02693b7d46 100755
+--- a/target/i386/latx/include/box64context.h
++++ b/target/i386/latx/include/box64context.h
+@@ -6,6 +6,12 @@
+ #include <link.h>
+ #include "debug.h"
+ 
++/* musl doesn't define these glibc-specific types */
++#if !defined(__GLIBC__)
++typedef uint64_t ino64_t;
++typedef long int Lmid_t;
++#endif
++
+ typedef struct elfheader_s elfheader_t;
+ typedef struct cleanup_s cleanup_t;
+ typedef struct lib_s lib_t;
+diff --git a/target/i386/latx/include/debug.h b/target/i386/latx/include/debug.h
+index 2e302fa22c..7901aa0ed2 100755
+--- a/target/i386/latx/include/debug.h
++++ b/target/i386/latx/include/debug.h
+@@ -53,6 +53,17 @@ extern char* libGL;
+ #define EXPORT __attribute__((visibility("default")))
+ #define EXPORTDYN 
+ 
++/*
++ * For static linking, use standard interfaces since symbols are not exported
++ * and won't be affected by guest program's malloc hooks.
++ */
++#if defined(CONFIG_STATIC)
++#define box_malloc      malloc
++#define box_realloc     realloc
++#define box_calloc      calloc
++#define box_free        free
++#define box_memalign    memalign
++#else
+ extern void* __libc_malloc(size_t);
+ extern void* __libc_realloc(void*, size_t);
+ extern void* __libc_calloc(size_t, size_t);
+@@ -63,7 +74,8 @@ extern void* __libc_memalign(size_t, size_t);
+ #define box_realloc     __libc_realloc
+ #define box_calloc      __libc_calloc
+ #define box_free        __libc_free
+-#define box_memalign    __libc_memalign 
++#define box_memalign    __libc_memalign
++#endif
+ extern char* box_strdup(const char* s);
+ #if defined(CONFIG_LATX_KZT) && defined(CONFIG_LATX_DEBUG)
+ void latx_kzt_debuginfo_check(void);
+diff --git a/target/i386/latx/include/latx-types.h b/target/i386/latx/include/latx-types.h
+index 70b2ea8763..f86eae3fb9 100644
+--- a/target/i386/latx/include/latx-types.h
++++ b/target/i386/latx/include/latx-types.h
+@@ -4,6 +4,14 @@
+ #include <inttypes.h>
+ #include "qemu/osdep.h"
+ 
++#ifndef __WORDSIZE
++#  if defined(__LP64__) || defined(_LP64)
++#    define __WORDSIZE 64
++#  else
++#    define __WORDSIZE 32
++#  endif
++#endif
++
+ typedef char int8;
+ typedef short int16;
+ typedef int int32;
+diff --git a/target/i386/latx/optimization/imm-cache.c b/target/i386/latx/optimization/imm-cache.c
+index 1eb041f5aa..f61b271269 100644
+--- a/target/i386/latx/optimization/imm-cache.c
++++ b/target/i386/latx/optimization/imm-cache.c
+@@ -149,8 +149,13 @@ static inline void imm_cache_init_bucket(IMM_CACHE_BUCKET *bucket, int index)
+     bucket[index].lifecycle = 0;
+     bucket[index].pre_cache = false;
+     bucket[index].avg_offset = 0;
++#if defined(__GLIBC__)
+     bucket[index].min_offset = LONG_LONG_MAX;
+     bucket[index].max_offset = LONG_LONG_MIN;
++#else
++    bucket[index].min_offset = LLONG_MAX;
++    bucket[index].max_offset = LLONG_MIN;
++#endif
+ }
+ 
+ void imm_cache_init(IMM_CACHE *imm_cache, int capacity)
+diff --git a/target/i386/latx/optimization/tunnel-lib.c b/target/i386/latx/optimization/tunnel-lib.c
+index 41a6928118..483fcb3c44 100644
+--- a/target/i386/latx/optimization/tunnel-lib.c
++++ b/target/i386/latx/optimization/tunnel-lib.c
+@@ -205,7 +205,9 @@ struct lib_method_item method_table[]  = {
+     {LIB_WRAP(memcpy),    { ARCH(arg_gpr_cmn),   ARCH(gpr_ret_cmn), NULL} },
+     {LIB_IFNA(memchr),    { ARCH(arg_gpr_cmn),   ARCH(gpr_ret_cmn), NULL} },
+     {LIB_IFNA(memmove),   { ARCH(arg_gpr_cmn),   ARCH(gpr_ret_cmn), NULL} },
++#if defined(__GLIBC__)
+     {LIB_IFNA(__mempcpy), { ARCH(arg_gpr_cmn),   ARCH(gpr_ret_cmn), NULL} },
++#endif
+     {LIB_IFNA(strncmp),   { ARCH(arg_gpr_cmn),   ARCH(gpr_ret_cmn), NULL} },
+     {LIB_IFNA(strlen),    { ARCH(arg_gpr_cmn),   ARCH(gpr_ret_cmn), NULL} },
+     {LIB_IFNA(strcmp),    { ARCH(arg_gpr_cmn),   ARCH(gpr_ret_cmn), NULL} },
+diff --git a/target/i386/latx/sbt/segment.c b/target/i386/latx/sbt/segment.c
+index feb3171970..4dc3459872 100644
+--- a/target/i386/latx/sbt/segment.c
++++ b/target/i386/latx/sbt/segment.c
+@@ -5,6 +5,7 @@
+  */
+ #include "segment.h"
+ #include "latx-options.h"
++#include <libgen.h>
+ 
+ #ifdef CONFIG_LATX_AOT
+ static GTree *segment_tree;
