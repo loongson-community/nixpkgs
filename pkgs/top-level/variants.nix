@@ -71,6 +71,26 @@ self: super: {
     };
   };
 
+  pkgsGlibcStatic =
+    if stdenv.hostPlatform.isLinux then
+      nixpkgsFun {
+        overlays = [
+          (self': super': {
+            pkgsGlibcStatic = super';
+          })
+        ]
+        ++ overlays;
+
+        crossSystem = stdenv.hostPlatform // {
+          isStatic = true;
+          gcc =
+            lib.optionalAttrs (stdenv.hostPlatform.system == "powerpc64-linux") { abi = "elfv2"; }
+            // stdenv.hostPlatform.gcc or { };
+        };
+      }
+    else
+      throw "Glibc only supports 64-bit Linux systems.";
+
   # All packages built with the Musl libc. This will override the
   # default GNU libc on Linux systems. Non-Linux systems are not
   # supported. 32-bit is also not supported.

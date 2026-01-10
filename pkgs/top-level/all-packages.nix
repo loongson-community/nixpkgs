@@ -11147,6 +11147,8 @@ with pkgs;
     fftw = fftwSinglePrec;
   };
 
+  latx = callPackage ../applications/virtualization/latx { };
+
   lemonbar = callPackage ../applications/window-managers/lemonbar { };
 
   lemonbar-xft = callPackage ../applications/window-managers/lemonbar/xft.nix { };
