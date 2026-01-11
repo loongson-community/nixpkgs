@@ -210,4 +210,9 @@ rec {
       passthruFun
       ;
   };
+
+  luajit_loongson = import ../luajit/loongson.nix {
+    self = luajit_loongson;
+    inherit callPackage fetchFromGitHub passthruFun;
+  };
 }
