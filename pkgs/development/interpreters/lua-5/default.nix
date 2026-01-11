@@ -179,4 +179,9 @@ rec {
     self = luajit_openresty;
     inherit callPackage fetchFromGitHub passthruFun;
   };
+
+  luajit_loongson = import ../luajit/loongson.nix {
+    self = luajit_loongson;
+    inherit callPackage fetchFromGitHub passthruFun;
+  };
 }
