@@ -4407,6 +4407,7 @@ with pkgs;
     luajit_2_1
     luajit_2_0
     luajit_openresty
+    luajit_loongson
     ;
 
   lua5 = lua5_2_compat;
@@ -4421,7 +4422,7 @@ with pkgs;
 
   luaPackages = lua52Packages;
 
-  luajit = luajit_2_1;
+  luajit = if stdenv.hostPlatform.isLoongArch64 then luajit_loongson else luajit_2_1;
 
   luarocks = luaPackages.luarocks;
   luarocks-nix = luaPackages.luarocks-nix;
