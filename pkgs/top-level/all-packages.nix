@@ -4336,6 +4336,7 @@ with pkgs;
     luajit_2_1
     luajit_2_0
     luajit_openresty
+    luajit_loongson
     ;
 
   lua51Packages = recurseIntoAttrs lua5_1.pkgs;
@@ -4345,7 +4346,13 @@ with pkgs;
   lua55Packages = recurseIntoAttrs lua5_5.pkgs;
   luajitPackages = recurseIntoAttrs luajit.pkgs;
 
-  luajit = if stdenv.hostPlatform.isRiscV64 then luajit_openresty else luajit_2_1;
+  luajit =
+    if stdenv.hostPlatform.isRiscV64 then
+      luajit_openresty
+    else if stdenv.hostPlatform.isLoongArch64 then
+      luajit_loongson
+    else
+      luajit_2_1;
 
   luarocks = lua52Packages.luarocks;
   luarocks-nix = lua52Packages.luarocks-nix;
