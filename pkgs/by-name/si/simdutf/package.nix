@@ -33,6 +33,12 @@ stdenv.mkDerivation (finalAttrs: {
     libiconv
   ];
 
+  env.NIX_CFLAGS_COMPILE = lib.concatStringsSep " " (
+    lib.optionals stdenv.hostPlatform.isLoongArch64 [ "-mlasx" ]
+  );
+
+  hardeningDisable = lib.optionals stdenv.hostPlatform.isLoongArch64 [ "fortify" ];
+
   passthru = {
     updateScript = nix-update-script { };
 
