@@ -64,6 +64,13 @@ buildPythonPackage rec {
     xcodebuild
   ];
 
+  env.NIX_CFLAGS_COMPILE = lib.optionalString stdenv.hostPlatform.isLoongArch64 (
+    lib.concatStringsSep " " [
+      "-mlasx"
+      "-flax-vector-conversions"
+    ]
+  );
+
   nativeCheckInputs = [ pytestCheckHook ];
 
   pythonImportsCheck = [ "pathops" ];
