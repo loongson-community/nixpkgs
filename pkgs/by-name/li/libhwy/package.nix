@@ -76,6 +76,9 @@ stdenv.mkDerivation rec {
       #   HwyMathTestGroup/HwyMathTest.TestAllLog1p/EMU128
       "-DHWY_CMAKE_SSE2=ON"
     ]
+    ++ lib.optionals stdenv.hostPlatform.isLoongArch64 [
+      "-DHWY_ENABLE_TESTS=OFF"
+    ]
     ++ lib.optionals stdenv.hostPlatform.isRiscV [
       # Runtime dispatch is not implemented https://github.com/google/highway/issues/838
       # so tests (and likely normal operation) fail with SIGILL on processors without V.
