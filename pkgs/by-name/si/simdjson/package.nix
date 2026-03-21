@@ -28,6 +28,12 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.cmakeFeature "CMAKE_CXX_FLAGS" "-mpower8-vector")
   ];
 
+  env.NIX_CFLAGS_COMPILE = lib.concatStringsSep " " (
+    lib.optionals stdenv.hostPlatform.isLoongArch64 [ "-mlasx" ]
+  );
+
+  hardeningDisable = lib.optionals stdenv.hostPlatform.isLoongArch64 [ "fortify" ];
+
   meta = {
     homepage = "https://simdjson.org/";
     description = "Parsing gigabytes of JSON per second";
