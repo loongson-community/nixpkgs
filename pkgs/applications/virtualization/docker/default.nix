@@ -107,6 +107,15 @@ let
           hash = containerdHash;
         };
 
+        postPatch = (oldAttrs.postPatch or "") + lib.optionalString stdenv.hostPlatform.isLoongArch64 ''
+          # cilium/ebpf vendored by containerd 1.7.x predates loong64 support, so
+          # its build tag for the little-endian NativeEndian constant excludes it.
+          if [ -f vendor/github.com/cilium/ebpf/internal/endian_le.go ]; then
+            substituteInPlace vendor/github.com/cilium/ebpf/internal/endian_le.go \
+              --replace-quiet 'arm || arm64 ||' 'arm || arm64 || loong64 ||'
+          fi
+        '';
+
         buildInputs = oldAttrs.buildInputs ++ lib.optionals withSeccomp [ libseccomp ];
 
         # See above
