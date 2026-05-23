@@ -39,6 +39,13 @@ stdenv.mkDerivation (finalAttrs: {
   patches = lib.optional useSystemJemalloc (fetchpatch2 {
     url = "https://gitlab.archlinux.org/archlinux/packaging/packages/redis/-/raw/102cc861713c796756abd541bf341a4512eb06e6/redis-5.0-use-system-jemalloc.patch";
     hash = "sha256-A9qp+PWQRuNy/xmv9KLM7/XAyL7Tzkyn0scpVCGngcc=";
+  })
+  # Without this patch, tests/unit/moduleapi/crash.tcl fails on loongarch64-linux
+  # because getAndSetMcontextEip() returns NULL and the signal handler skips the
+  # "Crashed running the instruction at" log line that the test waits for.
+  ++ lib.optional stdenv.hostPlatform.isLoongArch64 (fetchpatch2 {
+    url = "https://github.com/darkyzhou/redis/commit/1adec9a4f97eed5257ce3da6a3bf7ae66dca6872.patch";
+    hash = "sha256-PfekBEqc/roJjZ+EcZtTZ9TtT6Sa5W6rt8aSPQlC9h8=";
   });
 
   postPatch = lib.optionalString stdenv.hostPlatform.isDarwin ''
