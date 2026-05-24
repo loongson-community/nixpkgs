@@ -87,6 +87,13 @@ stdenv.mkDerivation (finalAttrs: {
     source ${npmHooks.npmConfigHook}/nix-support/setup-hook
     npmRoot=src/typescript/api npmDeps=${finalAttrs.apiDeps} npmConfigHook
     npmRoot=src/typescript/extension-manager npmDeps=${finalAttrs.extensionManagerDeps} npmConfigHook
+  ''
+  # dprint-node only ships prebuilt native binaries for x86_64 and aarch64:
+  # https://github.com/devongovett/dprint-node/blob/v1.0.8/.github/workflows/tag-release.yml
+  + lib.optionalString (!stdenv.hostPlatform.isx86_64 && !stdenv.hostPlatform.isAarch64) ''
+    for f in src/typescript/*/node_modules/dprint-node/index.js; do
+      printf 'exports.format = (_filePath, code) => code;\n' > "$f"
+    done
   '';
 
   qtWrapperArgs = [
