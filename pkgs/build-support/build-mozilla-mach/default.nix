@@ -150,6 +150,7 @@ in
     # PGO merges profile data with a 32-bit llvm-profdata, which runs out of
     # address space on the huge libxul profile, so disable it on 32-bit.
     && stdenv.hostPlatform.is64bit
+    && !stdenv.hostPlatform.isLoongArch64
   ),
   xvfb-run,
 
@@ -639,6 +640,7 @@ buildStdenv.mkDerivation {
     # if not explicitly set, wrong cc from buildStdenv would be used
     HOST_CC = "${llvmPackagesBuildBuild.stdenv.cc}/bin/cc";
     HOST_CXX = "${llvmPackagesBuildBuild.stdenv.cc}/bin/c++";
+    RUSTFLAGS = "-C target-feature=-relax";
   }
   // lib.optionalAttrs stdenv.hostPlatform.isMusl {
     # Firefox relies on nonstandard behavior of the glibc dynamic linker. It re-uses
