@@ -122,7 +122,15 @@ let
         "x86_64-linux"
         "x86_64-windows"
       ]
-      ++ (if extraNativePlatformJars != null then [ "riscv64-linux" ] else [ ]),
+      ++ (
+        if extraNativePlatformJars != null then
+          [
+            "riscv64-linux"
+            "loongarch64-linux"
+          ]
+        else
+          [ ]
+      ),
 
       # Extra attributes to be merged into the resulting derivation's
       # meta attribute.
@@ -391,7 +399,11 @@ rec {
     hash = "sha256-8XcSmKcPbbWina9iN4xOGKF/wzybprFDYuDN9AYQOA0=";
     defaultJava = jdk21;
     updateScriptMajorVersion = "8";
-    extraNativePlatformJars = if stdenv.hostPlatform.isRiscV64 then gradle-native-platform else null;
+    extraNativePlatformJars =
+      if stdenv.hostPlatform.isRiscV64 || stdenv.hostPlatform.isLoongArch64 then
+        gradle-native-platform
+      else
+        null;
   };
 
   # Default version of Gradle in nixpkgs.
