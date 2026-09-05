@@ -115,7 +115,9 @@ assert lib.assertMsg (enableGtk -> lib.versionAtLeast featureVersion "11")
   "GTK support in OpenJDK requires version 11.x or newer, because earlier versions would depend on GTK 2.";
 
 let
-  sourceFile = ./. + "/${featureVersion}/source.json";
+  sourceFile =
+    ./.
+    + "/${featureVersion}/source${lib.optionalString stdenv.hostPlatform.isLoongArch64 "-loongson"}.json";
   source = nixpkgs-openjdk-updater.openjdkSource {
     inherit sourceFile;
     featureVersionPrefix = tagPrefix + featureVersion;
@@ -129,7 +131,9 @@ let
 
   tagPrefix = if atLeast11 then "jdk-" else "jdk";
   version = lib.removePrefix "refs/tags/${tagPrefix}" source.src.rev;
-  versionSplit = builtins.match (if atLeast11 then "(.+)+(.+)" else "(.+)-b(.+)") version;
+  versionSplit = builtins.match (
+    if atLeast11 then "(.+)[+]([0-9]+).*" else "(.+)-b([0-9]+).*"
+  ) version;
   versionBuild = lib.elemAt versionSplit 1;
 
   # The JRE 8 libraries are in directories that depend on the CPU.
@@ -257,7 +261,7 @@ stdenv.mkDerivation (finalAttrs: {
       if atLeast17 then ./17/patches/swing-use-gtk-jdk13.patch else ./11/patches/swing-use-gtk-jdk10.patch
     )
   ]
-  ++ lib.optionals (featureVersion == "11") [
+  ++ lib.optionals (featureVersion == "11" && !stdenv.hostPlatform.isLoongArch64) [
     ./11/patches/fix-oopdesc-ptr-alignment-ub.patch
   ];
 
