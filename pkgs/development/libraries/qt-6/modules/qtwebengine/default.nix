@@ -134,6 +134,20 @@
       extraPrefix = "src/3rdparty/chromium/";
       hash = "sha256-FmWhwpZvRPmf62ec7ActBVryPzt6uJN/wR17/Mdva/o=";
     })
+    (fetchpatch2 {
+      name = "fix-v8-assembler-kMaximalBufferSize.patch";
+      url = "https://github.com/lcpu-club/loongarch-packages/raw/7292b33657f6e476b286793cb8f3840b3d19e27f/qt6-webengine/fix-v8-assembler-kMaximalBufferSize.patch?full_index=1";
+      stripLen = 1;
+      extraPrefix = "src/3rdparty/chromium/";
+      hash = "sha256-3sHHdQ7PiDnyYFFqHLjfO8bLAkOxz3/vv1IKvcuB4b8=";
+    })
+    (fetchpatch2 {
+      name = "libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch";
+      url = "https://github.com/lcpu-club/loongarch-packages/raw/7292b33657f6e476b286793cb8f3840b3d19e27f/qt6-webengine/libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch?full_index=1";
+      stripLen = 1;
+      extraPrefix = "src/3rdparty/chromium/";
+      hash = "sha256-S4rj3XSjHENpJjGH9zH1+NIGjxRQOhBFL3Ya9VuPtWw=";
+    })
   ];
 
   postPatch = ''
