@@ -336,6 +336,9 @@ stdenv.mkDerivation (
           [
             "-Wno-error=sign-compare" # freetype-2.5.4 changed signedness of some struct fields
           ]
+          ++ lib.optionals (stdenv.hostPlatform.isLoongArch64) [
+            "-O0"
+          ]
           ++ lib.optionals (stdenv.buildPlatform != stdenv.hostPlatform) [
             "-Wno-warn=free-nonheap-object"
             "-Wno-free-nonheap-object"
