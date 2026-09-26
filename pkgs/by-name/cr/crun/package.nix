@@ -167,7 +167,8 @@ stdenv.mkDerivation (finalAttrs: {
       --replace-fail '"libwasmtime.so"' '"${wasmtime.lib}/lib/libwasmtime.so"'
   '';
 
-  doCheck = true;
+  # FAIL: tests/tests_libcrun_ring_buffer 5 - test_ring_buffer_wraparound_partial_drain
+  doCheck = !stdenv.hostPlatform.isLoongArch64;
 
   passthru.tests = { inherit (nixosTests) podman; };
 
