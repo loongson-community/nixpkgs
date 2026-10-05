@@ -1,6 +1,8 @@
 {
   stdenv,
   lib,
+  rustPlatform,
+  cmake,
   nix-update-script,
   go,
   buildGoModule,
@@ -42,11 +44,40 @@ let
 
   pname = "prometheus";
 
+  # Keep this in sync with the Rolldown version in web/ui/pnpm-lock.yaml.
+  rolldownVersion = "1.2.7";
+
   src = fetchFromGitHub {
     owner = "prometheus";
     repo = "prometheus";
     tag = "v${version}";
     hash = "sha256-H0VkirdEVWoFxg86g8utf6EuCSH3pHD8iuHg6y0xOZE=";
+  };
+
+  # Rolldown does not publish a LoongArch native binding, while the WASI
+  # fallback uses SIMD instructions unsupported by Node.js on LoongArch.
+  rolldownBinding = rustPlatform.buildRustPackage {
+    pname = "rolldown-binding";
+    version = rolldownVersion;
+
+    src = fetchFromGitHub {
+      owner = "rolldown";
+      repo = "rolldown";
+      tag = "v${rolldownVersion}";
+      hash = "sha256-mO+L2/PepT/4jvAnTArFthdPmgvSXB/dmalxRg+VHjM=";
+    };
+
+    cargoHash = "sha256-Og9ymUaqp91m9j9/QMD+zrV7Z5o9NC9TKdj9Y8MCCQA=";
+    cargoBuildFlags = [ "-p" "rolldown_binding" ];
+    nativeBuildInputs = [ cmake ];
+    doCheck = false;
+
+    installPhase = ''
+      runHook preInstall
+      binding=$(find target -name librolldown_binding.so -type f -print -quit)
+      install -Dm755 "$binding" "$out/rolldown-binding.linux-loong64-gnu.node"
+      runHook postInstall
+    '';
   };
 
   assets = stdenv.mkDerivation (finalAssetsAttrs: {
@@ -60,6 +91,12 @@ let
       # script
       ./disable-react-app.diff
     ];
+
+    postPatch = lib.optionalString stdenv.hostPlatform.isLoongArch64 ''
+      # Lightning CSS also lacks a LoongArch native binding.
+      substituteInPlace mantine-ui/vite.config.ts \
+        --replace-fail "  build: {" "  build: { cssMinify: false,"
+    '';
 
     pnpmDeps = fetchPnpmDeps {
       inherit (finalAssetsAttrs) pname version src;
@@ -75,6 +112,11 @@ let
     ];
 
     env.CI = true;
+
+    preBuild = lib.optionalString stdenv.hostPlatform.isLoongArch64 ''
+      cp ${rolldownBinding}/rolldown-binding.linux-loong64-gnu.node \
+        node_modules/.pnpm/rolldown@${rolldownVersion}/node_modules/rolldown/dist/shared/rolldown-binding.linux-loong64-gnu.node
+    '';
 
     __darwinAllowLocalNetworking = true;
 
