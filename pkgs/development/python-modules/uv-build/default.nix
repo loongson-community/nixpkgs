@@ -2,6 +2,7 @@
   lib,
   pkgs,
   fetchFromGitHub,
+  fetchurl,
   buildPythonPackage,
   rustPlatform,
   callPackage,
@@ -18,6 +19,16 @@ buildPythonPackage (finalAttrs: {
     tag = finalAttrs.version;
     hash = "sha256-tKdqciPQnteeTqkXtWY8mliWUDv5gMdU8x0UPadQZlQ=";
   };
+
+  # Add the missing FIEMAP ioctl constants for loongarch64
+  # https://github.com/sunfishcode/linux-raw-sys/pull/195
+  patches = [
+    (fetchurl {
+      name = "loongarch64-fiemap.patch";
+      url = "https://github.com/lcpu-club/loongarch-packages/raw/28165d5d4f00d1dfb6194c7d4f1f37e9c2ba56b2/uv/loongarch64-fiemap.patch";
+      hash = "sha256-owRf+JtH/4GKsUFB2UwKCvXhLUZJ3vI2Zeywhz4tgbE=";
+    })
+  ];
 
   nativeBuildInputs = [
     rustPlatform.cargoSetupHook
