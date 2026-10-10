@@ -32,6 +32,8 @@ buildNpmPackage (finalAttrs: {
     libsecret
   ];
 
+  npmFlags = [ "--ignore-scripts" ];
+
   meta = {
     description = "Lightweight server clone of Azure Storage that simulates most of the commands supported by it with minimal dependencies";
     homepage = "https://github.com/Azure/Azurite";
