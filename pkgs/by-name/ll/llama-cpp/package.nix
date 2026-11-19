@@ -21,7 +21,8 @@
   intel-oneapi-toolkit,
   level-zero,
 
-  cpuArchDynamicDispatch ? true,
+  # GGML has a single LoongArch CPU backend and cannot build all variants there.
+  cpuArchDynamicDispatch ? !stdenv.hostPlatform.isLoongArch64,
 
   openclSupport ? false,
   clblast,
@@ -39,6 +40,7 @@
   fetchNpmDeps,
   nodejs_latest,
   npmHooks,
+  vips,
 
   pkg-config,
   python3,
@@ -56,8 +58,8 @@
 let
   # Upstream reads these from git, which the release tarball does not ship.
   # They are purely informational: `llama-server --version`, `/props`, and the web UI.
-  buildNumber = "12359";
-  buildCommit = "b1b770d";
+  buildNumber = "12774";
+  buildCommit = "1715275";
 
   # It's necessary to consistently use backendStdenv when building with CUDA support,
   # otherwise we get libstdc++ errors downstream.
@@ -99,7 +101,67 @@ let
     vulkan-loader
   ];
 
-  buildCc = buildPackages.stdenv.cc;
+  # These npm packages do not ship LoongArch binaries. Their bindings run
+  # during the UI build, so build them for the machine running Node.
+  needsNativeUiBindings = stdenv.buildPlatform.isLoongArch64;
+  uiBindingSuffix = if stdenv.buildPlatform.isMusl then "musl" else "gnu";
+
+  # Match the versions in ui/apps/chat/package-lock.json.
+  tailwindOxide = buildPackages.rustPlatform.buildRustPackage (finalAttrs: {
+    pname = "tailwindcss-oxide";
+    version = "4.3.5";
+    src = fetchFromGitHub {
+      owner = "tailwindlabs";
+      repo = "tailwindcss";
+      tag = "v${finalAttrs.version}";
+      hash = "sha256-Z/uYQ1H6T+65pXlEfTVSCCzVNFYS657kQhDG3OEzt34=";
+    };
+    cargoHash = "sha256-9DxJoj0bgN0Pmqm71AthEV/9e6MXDbt+LtplKvn3wow=";
+    cargoBuildFlags = [ "--package=tailwind-oxide" ];
+    doCheck = false;
+    installPhase = ''
+      runHook preInstall
+      install -Dm444 target/*/release/libtailwind_oxide.so "$out/lib/tailwindcss-oxide.node"
+      runHook postInstall
+    '';
+  });
+
+  rolldownBinding = buildPackages.rustPlatform.buildRustPackage (finalAttrs: {
+    pname = "rolldown-binding";
+    version = "1.2.18";
+
+    src = fetchFromGitHub {
+      owner = "rolldown";
+      repo = "rolldown";
+      tag = "v${finalAttrs.version}";
+      hash = "sha256-FxwOfpykZaF2EDVfrhX/CZ2PHHpBsATSBjLT9JKNC6E=";
+    };
+
+    cargoHash = "sha256-dX2tGEv9Ch2zdRDOGrf87ejZV2pdOqI2v0Y/gu7iOfM=";
+    nativeBuildInputs = [ cmake ];
+    dontUseCmakeConfigure = true;
+    cargoBuildFlags = [ "--package=rolldown_binding" ];
+    doCheck = false;
+
+    installPhase = ''
+      runHook preInstall
+      install -Dm444 target/*/release/librolldown_binding.so "$out/lib/rolldown-binding.node"
+      runHook postInstall
+    '';
+  });
+
+  lightningcssNode = buildPackages.lightningcss.overrideAttrs {
+    pname = "lightningcss-node";
+    cargoBuildFeatures = [ ];
+    cargoBuildFlags = [ "--package=lightningcss_node" ];
+    doCheck = false;
+
+    installPhase = ''
+      runHook preInstall
+      install -Dm444 target/*/release/liblightningcss_node.so "$out/lib/lightningcss.node"
+      runHook postInstall
+    '';
+  };
 in
 effectiveStdenv.mkDerivation (finalAttrs: {
   pname = "llama-cpp";
@@ -120,6 +182,9 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     hash = "sha256-0O3An2dgjy3HGF6T3ZDiEPwnv26+6B8os7htE6ocG8I=";
   };
 
+  # Storybook's test plugin requires Oxc bindings that are absent on LoongArch.
+  patches = [ ./defer-storybook-test-plugin.patch ];
+
   nativeBuildInputs = [
     cmake
     installShellFiles
@@ -128,6 +193,9 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     npmHooks.npmConfigHook
     pkg-config
   ]
+  ++ optionals needsNativeUiBindings [
+    python3
+  ]
   ++ optionals cudaSupport [
     cudaPackages.cuda_nvcc
     autoAddDriverRunpath
@@ -135,11 +203,6 @@ effectiveStdenv.mkDerivation (finalAttrs: {
   # `glslc` is used at build time to compile the shaders
   ++ optionals vulkanSupport [
     shaderc
-  ];
-
-  depsBuildBuild = optionals (stdenv.buildPlatform != stdenv.hostPlatform) [
-    # llama-ui-embed under tools/ui needs a host compiler
-    buildCc
   ];
 
   buildInputs =
@@ -152,6 +215,7 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     ]
     ++ optionals blasSupport [ blas ]
     ++ optionals vulkanSupport vulkanBuildInputs
+    ++ optionals needsNativeUiBindings [ vips ]
     ++ [ openssl ];
 
   # Fortify adds __memcpy_chk references to the SYCL device code, which the GPU
@@ -161,8 +225,8 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     "fortify3"
   ];
 
-  npmRoot = "ui/lib/ui";
-  npmDepsHash = "sha256-lKvSNPTG1Mh0Z+zC4yKhS/spZH+oz4BnznwhCqhrREE=";
+  npmRoot = "ui/apps/chat";
+  npmDepsHash = "sha256-5NCbd2NT4xSo5dCaLndj/FVorm82fUN3iv1BTwurMy4=";
   npmDeps = fetchNpmDeps {
     name = "${finalAttrs.pname}-${finalAttrs.version}-npm-deps";
     inherit (finalAttrs) src;
@@ -175,8 +239,25 @@ effectiveStdenv.mkDerivation (finalAttrs: {
 
   preConfigure = ''
     pushd ${finalAttrs.npmRoot}
-    substituteInPlace package.json --replace-fail " && publint" ""
-    LLAMA_BUILD_NUMBER=${buildNumber} npm run build
+  ''
+  + optionalString needsNativeUiBindings ''
+    (
+      cd node_modules/sharp
+      export SHARP_FORCE_GLOBAL_LIBVIPS=1
+      export npm_config_nodedir=${nodejs_latest}
+      export NODE_PATH="$(dirname "$npm_config_node_gyp")/../.."
+      npm run build
+    )
+    ln -s ${tailwindOxide}/lib/tailwindcss-oxide.node \
+      node_modules/@tailwindcss/oxide/tailwindcss-oxide.linux-loong64-${uiBindingSuffix}.node
+    ln -s ${rolldownBinding}/lib/rolldown-binding.node \
+      node_modules/rolldown/dist/shared/rolldown-binding.linux-loong64-${uiBindingSuffix}.node
+    ln -s ${lightningcssNode}/lib/lightningcss.node \
+      node_modules/lightningcss/lightningcss.linux-loong64-${uiBindingSuffix}.node
+  ''
+  + ''
+    LLAMA_UI_VERSION=b${buildNumber} LLAMA_BUILD_NUMBER=${buildNumber} npm run build
+    test -s dist/index.html
     popd
   '';
 
@@ -184,6 +265,7 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     (cmakeBool "GGML_NATIVE" false) # -march=native would make builds non-deterministic
     (cmakeBool "LLAMA_BUILD_EXAMPLES" false)
     (cmakeBool "LLAMA_BUILD_SERVER" true)
+    (cmakeBool "LLAMA_USE_PREBUILT_UI" false)
     (cmakeBool "LLAMA_BUILD_TESTS" (finalAttrs.finalPackage.doCheck or false))
     (cmakeBool "LLAMA_TESTS_INSTALL" false)
     (cmakeBool "LLAMA_BUILD_IS_DEV" false)
@@ -224,9 +306,6 @@ effectiveStdenv.mkDerivation (finalAttrs: {
   ++ optionals metalSupport [
     (cmakeFeature "CMAKE_C_FLAGS" "-D__ARM_FEATURE_DOTPROD=1")
     (cmakeBool "LLAMA_METAL_EMBED_LIBRARY" true)
-  ]
-  ++ optionals (stdenv.buildPlatform != stdenv.hostPlatform) [
-    (cmakeFeature "HOST_CXX_COMPILER" (lib.getExe' buildCc "${buildCc.targetPrefix}c++"))
   ];
 
   postInstall = optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
