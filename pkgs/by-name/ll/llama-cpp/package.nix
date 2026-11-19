@@ -21,7 +21,8 @@
   intel-oneapi-toolkit,
   level-zero,
 
-  cpuArchDynamicDispatch ? true,
+  # GGML has a single LoongArch CPU backend and cannot build all variants there.
+  cpuArchDynamicDispatch ? !stdenv.hostPlatform.isLoongArch64,
 
   openclSupport ? false,
   clblast,
@@ -39,6 +40,7 @@
   fetchNpmDeps,
   nodejs_latest,
   npmHooks,
+  vips,
 
   pkg-config,
   python3,
@@ -99,6 +101,54 @@ let
   ];
 
   buildCc = buildPackages.stdenv.cc;
+
+  # These npm packages do not ship LoongArch binaries. Their bindings run
+  # during the UI build, so build them for the machine running Node.
+  needsNativeUiBindings = stdenv.buildPlatform.isLoongArch64;
+  uiBindingSuffix = if stdenv.buildPlatform.isMusl then "musl" else "gnu";
+
+  # Match the versions in tools/ui/package-lock.json.
+  tailwindOxide = buildPackages.rustPlatform.buildRustPackage (finalAttrs: {
+    pname = "tailwindcss-oxide";
+    version = "4.1.11";
+    src = fetchFromGitHub {
+      owner = "tailwindlabs";
+      repo = "tailwindcss";
+      tag = "v${finalAttrs.version}";
+      hash = "sha256-QjgztsXB9tz95xcthQyFFoGmbrNaG0s9JcKd8CLD0Bk=";
+    };
+    cargoHash = "sha256-MnNcndDbdqJNEISYCXy6TsN4+uk6/ahImAXX6XdBMWs=";
+    cargoBuildFlags = [ "--package=tailwind-oxide" ];
+    doCheck = false;
+    installPhase = ''
+      runHook preInstall
+      install -Dm444 target/*/release/libtailwind_oxide.so "$out/lib/tailwindcss-oxide.node"
+      runHook postInstall
+    '';
+  });
+
+  lightningcssNode = buildPackages.rustPlatform.buildRustPackage (finalAttrs: {
+    pname = "lightningcss-node";
+    version = "1.30.1";
+    src = fetchFromGitHub {
+      owner = "parcel-bundler";
+      repo = "lightningcss";
+      tag = "v${finalAttrs.version}";
+      hash = "sha256-imLbsQ2F5CQiepwWSMcXj0Fgyv4liCMmCwA/0SE07Mo=";
+    };
+    cargoHash = "sha256-aNho9NavEgY4dwGcNXsLDnlVCB2rODIPae3LnfOwJIA=";
+    # Backport the cargo-auditable fix used by the lightningcss package.
+    postPatch = ''
+      substituteInPlace napi/Cargo.toml --replace-fail '"dep:rayon"' '"rayon"'
+    '';
+    cargoBuildFlags = [ "--package=lightningcss_node" ];
+    doCheck = false;
+    installPhase = ''
+      runHook preInstall
+      install -Dm444 target/*/release/liblightningcss_node.so "$out/lib/lightningcss.node"
+      runHook postInstall
+    '';
+  });
 in
 effectiveStdenv.mkDerivation (finalAttrs: {
   pname = "llama-cpp";
@@ -119,6 +169,9 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     hash = "sha256-aYziwYzK9Zj7sopAEsrANhMGs4BO0F2g0cDCGmYLxDA=";
   };
 
+  # Storybook's test plugin requires Oxc bindings that are absent on LoongArch.
+  patches = [ ./defer-storybook-test-plugin.patch ];
+
   nativeBuildInputs = [
     cmake
     installShellFiles
@@ -126,6 +179,9 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     nodejs_latest
     npmHooks.npmConfigHook
     pkg-config
+  ]
+  ++ optionals needsNativeUiBindings [
+    python3
   ]
   ++ optionals cudaSupport [
     cudaPackages.cuda_nvcc
@@ -151,6 +207,7 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     ]
     ++ optionals blasSupport [ blas ]
     ++ optionals vulkanSupport vulkanBuildInputs
+    ++ optionals needsNativeUiBindings [ vips ]
     ++ [ openssl ];
 
   # Fortify adds __memcpy_chk references to the SYCL device code, which the GPU
@@ -174,6 +231,22 @@ effectiveStdenv.mkDerivation (finalAttrs: {
 
   preConfigure = ''
     pushd ${finalAttrs.npmRoot}
+  ''
+  + optionalString needsNativeUiBindings ''
+    (
+      cd node_modules/sharp
+      export SHARP_FORCE_GLOBAL_LIBVIPS=1
+      export npm_config_nodedir=${nodejs_latest}
+      export NODE_PATH="$(dirname "$npm_config_node_gyp")/../.."
+      npm run build
+    )
+    substituteInPlace node_modules/@tailwindcss/oxide/index.js \
+      --replace-fail 'nativeBinding = requireNative()' \
+        'nativeBinding = require("${tailwindOxide}/lib/tailwindcss-oxide.node")'
+    ln -s ${lightningcssNode}/lib/lightningcss.node \
+      node_modules/lightningcss/lightningcss.linux-loong64-${uiBindingSuffix}.node
+  ''
+  + ''
     LLAMA_BUILD_NUMBER=${buildNumber} npm run build
     popd
   '';
