@@ -1,6 +1,6 @@
 {
-  "hash": "sha256-FoOczYNJbMNctCUYTDkIuUYmroGLuayce2CLEEp+GHo=",
+  "hash": "sha256-uGP6LQHGCQ8K+sI7G8DXcZE0I2KTs9KoP/bcKPtv6qc=",
   "owner": "loongson",
   "repo": "jdk8u",
-  "rev": "refs/tags/jdk8u502-b07-ls-ga"
+  "rev": "refs/tags/jdk8u512-b09-ls-0"
 }

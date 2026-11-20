@@ -1,6 +1,6 @@
 {
-  "hash": "sha256-oLMYteqJ9ARWDca/j4ByGwSMCyFeVoBXECxOVpE7hJk=",
+  "hash": "sha256-Ley9zGqgDasjFP0QqGhtupYU6lDlWt/kvjQ7MAcQG6Q=",
   "owner": "loongson",
   "repo": "jdk17u",
-  "rev": "refs/tags/jdk-17.0.20+8-ls-ga"
+  "rev": "refs/tags/jdk-17.0.21.0.3+1-ls-0"
 }

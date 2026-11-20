@@ -1,6 +1,6 @@
 {
-  "hash": "sha256-wbNbdidNYp84zMn9loCX8LGqXygkY57yBvRluc0MfsY=",
+  "hash": "sha256-L7KIMl5b82rk5pZCB/mBpuPCw4mw8dov5cQLxGzZgwY=",
   "owner": "loongson",
   "repo": "jdk25u",
-  "rev": "refs/tags/jdk-25.0.4+7-ls-ga"
+  "rev": "refs/tags/jdk-25.0.5.0.3+1-ls-0"
 }
