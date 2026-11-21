@@ -38,6 +38,7 @@
   webkitgtk_4_1,
   ripgrep,
   which,
+  libpulseaudio,
 
   # needed to fix "Save as Root"
   asar,
@@ -255,6 +256,9 @@ stdenv.mkDerivation (
       systemdLibs
       webkitgtk_4_1
       libxkbfile
+    ]
+    ++ lib.optionals stdenv.hostPlatform.isLoongArch64 [
+      libpulseaudio
     ];
 
     runtimeDependencies = lib.optionals stdenv.hostPlatform.isLinux [
